@@ -80,7 +80,7 @@ theme: next
 deploy:
   type: git
   repo: git@github.com:mstn/mstn.github.io.git
-  branch: gh-pages
+  branch: master
   message: Hexo Deploy Bot
 
 
