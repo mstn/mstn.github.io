@@ -78,7 +78,10 @@ theme: next
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type:
+  type: git
+  repo: git@github.com:mstn/mstn.github.io.git
+  branch: gh-pages
+  message: Hexo Deploy Bot
 
 
 # To get or check favicons visit: https://realfavicongenerator.net
