@@ -10,16 +10,18 @@
     "hexo-deployer-git": "^0.3.1",
     "hexo-generator-archive": "^0.1.4",
     "hexo-generator-category": "^0.1.3",
+    "hexo-generator-feed": "^1.2.2",
     "hexo-generator-index": "^0.2.0",
     "hexo-generator-tag": "^0.2.0",
     "hexo-renderer-ejs": "^0.3.0",
-    "hexo-renderer-marked": "^0.3.0",
+    "hexo-renderer-pandoc": "^0.2.2",
     "hexo-renderer-stylus": "^0.3.1",
-    "hexo-server": "^0.2.0"
+    "hexo-server": "^0.2.0",
+    "markdown-it-katex": "^2.0.3"
   },
   "scripts": {
     "deploy": "hexo generate --config source/_data/next.yml --deploy",
     "start": "hexo serve --config source/_data/next.yml",
-    "update-next": "rm -rf themes/next && mkdir themes/next && git clone --branch v5.1.4 https://github.com/iissnan/hexo-theme-next themes/next"
+    "update-next": "rm -rf themes/next && mkdir themes/next && git clone --branch v6.3.0 https://github.com/theme-next/hexo-theme-next.git themes/next"
   }
 }
