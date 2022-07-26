@@ -81,7 +81,8 @@ This is a table with some examples from some programming languages.
 | Ruby         | dynamic            | strong         |   ?                 |   NA     |  duck       |
 | Python       | dynamic            | strong         | both (?)            |   NA     |  duck       |
 | Javascript   | dynamic            | weak           | NA                  |   NA     |  NA         |
- 
+
+
 Java has (had?) an explicit type system and is (was?) based on nominal inheritance.
 This means that every variable must be typed and hierarchies of classes and interfaces tend to emerge.
 In my opinion, for this reason Java type system is heavy and adds overhead.
