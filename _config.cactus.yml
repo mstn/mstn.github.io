@@ -1,8 +1,15 @@
+#
+# Customization for [cactus theme](https://github.com/probberechts/hexo-theme-cactus) 
+# commit 7a6074d830ac5d524582f142ac524c041077aad7
+#
 projects_url: https://mstn.github.io
 
 nav:
   home: /
   articles: /archives/
+
+posts_overview:
+  show_all_posts: true
 
 social_links:
   - icon: github
