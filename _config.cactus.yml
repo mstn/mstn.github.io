@@ -5,10 +5,12 @@ nav:
   articles: /archives/
 
 social_links:
-  github: https://github.com/mstn
-  mail: mailto:mstn@posteo.org
+  - icon: github
+    link: your-github-url
+  - icon: mail
+    link: mailto:mstn@posteo.org
 
-tags_overview: true
+tags_overview: false
 
 copyright:
   start_year: 2018
