@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="High Speed Trains are killing the European railway network (2013). The author shows that saved travelling time is not much compared to increased ticket prices. In addition, even if trains are actuall">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Weekly digest (week 27-2018)">
+<meta property="og:url" content="https://mstn.github.io/2018/07/06/weekly-digest-272018/index.html">
+<meta property="og:site_name" content="mstn&#39;s blog">
+<meta property="og:description" content="High Speed Trains are killing the European railway network (2013). The author shows that saved travelling time is not much compared to increased ticket prices. In addition, even if trains are actuall">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-07-06T07:00:00.000Z">
+<meta property="article:modified_time" content="2025-04-21T06:52:27.136Z">
+<meta property="article:author" content="mstn">
+<meta property="article:tag" content="performance">
+<meta property="article:tag" content="react">
+<meta property="article:tag" content="graphql">
+<meta property="article:tag" content="logging">
+<meta property="article:tag" content="trains">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Weekly digest (week 27-2018)</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="mstn&#39;s blog" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2018/09/08/milner-bigraphs-matrices/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2018/06/08/fixed-size-arrays-in-typescript/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2018/07/06/weekly-digest-272018/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&text=Weekly digest (week 27-2018)"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&title=Weekly digest (week 27-2018)"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&is_video=false&description=Weekly digest (week 27-2018)"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Weekly digest (week 27-2018)&body=Check out this article: https://mstn.github.io/2018/07/06/weekly-digest-272018/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&title=Weekly digest (week 27-2018)"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&title=Weekly digest (week 27-2018)"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&title=Weekly digest (week 27-2018)"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&title=Weekly digest (week 27-2018)"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&name=Weekly digest (week 27-2018)&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2018/07/06/weekly-digest-272018/&t=Weekly digest (week 27-2018)"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Weekly digest (week 27-2018)
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">mstn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2018-07-06T07:00:00.000Z" class="dt-published" itemprop="datePublished">2018-07-06</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/graphql/" rel="tag">graphql</a>, <a class="p-category" href="/tags/logging/" rel="tag">logging</a>, <a class="p-category" href="/tags/performance/" rel="tag">performance</a>, <a class="p-category" href="/tags/react/" rel="tag">react</a>, <a class="p-category" href="/tags/trains/" rel="tag">trains</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <ul>
+<li><p><a target="_blank" rel="noopener" href="http://www.lowtechmagazine.com/2013/12/high-speed-trains-are-killing-the-european-railway-network.html">High Speed Trains are killing the European railway network</a> (2013). The author shows that saved travelling time is not much compared to increased ticket prices. In addition, even if trains are actually a more sustainable alternative to air traffic, the high cost of high speed train tickets forced more people to choose cheap but polluting flights over trains. Hence, the overall effect of high speed trains on the environment is negative. Wu Ming 1 from <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Wu_Ming">Wu Ming collective</a> <a target="_blank" rel="noopener" href="https://www.amazon.it/viaggio-promettiamo-breve-Venticinque-lotte/dp/8806225642/">wrote</a> an interesting book about the fights agaist high speed trains in Val di Susa (in Italian).</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://code.fb.com/android/profilo-understanding-app-performance-in-the-wild/">Understanding app performances in the wild</a>. Facebook has released Profilo, an a high-throughput, mobile-first performance tracing library. This tool allows developers to collect and analyse production performance traces. Profilo is available only for Android, at least for now.</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://medium.com/netflix-techblog/lessons-from-building-observability-tools-at-netflix-7cfafed6ab17">Lessons from Building Observability Tools at Netflix</a>. Netflix relies on several metrics to measure customers’ experience and to improve their product. Simply storing logs does not scale well and the microservice architecture adopted by Netflix introduces new challenges, too. Here is what Netflix did.</p>
+<ul>
+<li>Logs are kept and processed in memory and persisted only when needed. The bigger the system is, the higher storage costs and query times are. See also <a target="_blank" rel="noopener" href="https://medium.com/netflix-techblog/stream-processing-with-mantis-78af913f51a6">Mantis</a>.</li>
+<li>Microservices produce several distributed streams of logs. In order the get new insights on logs it is important to enrich traces with contextual information “so that multiple traces can be grouped together across services”.</li>
+<li>Traces are not analysed by eye, of course. Metrics analysis should be automatized and alerts should be raised if anomalies are detected. Netflix went beyond trivial threshold alerting and implemented some statistical/machine learning algorithms to analyse metrics trends.</li>
+<li>Log storing and retriving must be fast. Netflix used different databases (Cassandra, Elasticsearch, Hive) depending on the kinds of queries. For example, Elasticsearch is better for queries on different fields while Cassandra is better for queries by ids.</li>
+<li>Logs and analysis are made available to engineers and users through custom user interfaces. It does not make sense to show all logs always because not everybody is able to understand them.</li>
+</ul>
+</li>
+</ul>
+<p>It would interesting to know what they do for limiting the overhead of log collecting on the whole system performances.</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://brandur.org/graphql">Living APIs, and the Case for GraphQL</a>. The author says that, despite some interests from the developer community and some big players (e.g. Github), GraphQL isn’t spreading very fast. The reason for the author is that “GraphQL’s biggest problem may be that,although it’s better, it’s not ‘better enough’” with respect to REST. Then he makes some in depth arguments about why GraphQL is better. Instead, it would be interesting to know why it is not better enough.</li>
+<li>React 16 <a target="_blank" rel="noopener" href="https://building.calibreapp.com/debugging-react-performance-with-react-16-and-chrome-devtools-c90698a522ad">makes available</a> some performance metrics via browsers <a target="_blank" rel="noopener" href="https://www.html5rocks.com/en/tutorials/webperformance/usertiming/">User Timing API</a>. This will open a lot of possibilities for <a target="_blank" rel="noopener" href="https://reactjs.org/docs/optimizing-performance.html#profiling-components-with-the-chrome-performance-tab">profiling components</a>. For example, it could be interesting to see performance tools integrated into our CI processes. <a target="_blank" rel="noopener" href="https://jobs.zalando.com/tech/blog/loading-time-matters/">Here</a> is a report from Zalando engineers about their real world experience with performance optimization in React.</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2018/07/06/weekly-digest-272018/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&text=Weekly digest (week 27-2018)"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&title=Weekly digest (week 27-2018)"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&is_video=false&description=Weekly digest (week 27-2018)"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Weekly digest (week 27-2018)&body=Check out this article: https://mstn.github.io/2018/07/06/weekly-digest-272018/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&title=Weekly digest (week 27-2018)"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&title=Weekly digest (week 27-2018)"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&title=Weekly digest (week 27-2018)"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&title=Weekly digest (week 27-2018)"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2018/07/06/weekly-digest-272018/&name=Weekly digest (week 27-2018)&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2018/07/06/weekly-digest-272018/&t=Weekly digest (week 27-2018)"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    mstn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+ 
+  <link
+    rel="preload"
+    href="/lib/font-awesome/css/all.min.css"
+    as="style"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript
+    ><link
+      rel="stylesheet"
+      href="/lib/font-awesome/css/all.min.css"
+  /></noscript>
+
+
+    <!-- jquery -->
+
+  
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+
+
+
+<!-- clipboard -->
+
+  
+    
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

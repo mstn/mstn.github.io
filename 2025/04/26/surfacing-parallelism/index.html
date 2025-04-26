@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="In this post, I want to share some initial ideas on surfacing parallelism in code, drawing inspiration from the category theory framework introduced in [3] and [4]. My approach will be informal, prior">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Surfacing parallelism in imperative programs">
+<meta property="og:url" content="https://mstn.github.io/2025/04/26/surfacing-parallelism/index.html">
+<meta property="og:site_name" content="mstn&#39;s blog">
+<meta property="og:description" content="In this post, I want to share some initial ideas on surfacing parallelism in code, drawing inspiration from the category theory framework introduced in [3] and [4]. My approach will be informal, prior">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://mstn.github.io/images/surfacing-parallelism/assign.png">
+<meta property="og:image" content="https://mstn.github.io/images/surfacing-parallelism/condition.png">
+<meta property="og:image" content="https://mstn.github.io/images/surfacing-parallelism/alternative.png">
+<meta property="og:image" content="https://mstn.github.io/images/surfacing-parallelism/example-as-diagram.png">
+<meta property="og:image" content="https://mstn.github.io/images/surfacing-parallelism/monoid-rule.png">
+<meta property="og:image" content="https://mstn.github.io/images/surfacing-parallelism/whisk.png">
+<meta property="og:image" content="https://mstn.github.io/images/surfacing-parallelism/whiskering.png">
+<meta property="og:image" content="https://mstn.github.io/images/surfacing-parallelism/left-right.png">
+<meta property="og:image" content="https://mstn.github.io/images/surfacing-parallelism/parallel-rules.png">
+<meta property="og:image" content="https://mstn.github.io/images/surfacing-parallelism/final.png">
+<meta property="article:published_time" content="2025-04-26T07:00:00.000Z">
+<meta property="article:modified_time" content="2025-04-26T11:29:51.728Z">
+<meta property="article:author" content="mstn">
+<meta property="article:tag" content="applied category theory">
+<meta property="article:tag" content="compilers">
+<meta property="article:tag" content="optimization">
+<meta property="article:tag" content="tape diagrams">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mstn.github.io/images/surfacing-parallelism/assign.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Surfacing parallelism in imperative programs</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="mstn&#39;s blog" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/07/26/on-order-in-distributed/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2025/04/26/surfacing-parallelism/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&text=Surfacing parallelism in imperative programs"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&title=Surfacing parallelism in imperative programs"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&is_video=false&description=Surfacing parallelism in imperative programs"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Surfacing parallelism in imperative programs&body=Check out this article: https://mstn.github.io/2025/04/26/surfacing-parallelism/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&title=Surfacing parallelism in imperative programs"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&title=Surfacing parallelism in imperative programs"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&title=Surfacing parallelism in imperative programs"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&title=Surfacing parallelism in imperative programs"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&name=Surfacing parallelism in imperative programs&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2025/04/26/surfacing-parallelism/&t=Surfacing parallelism in imperative programs"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Tape-Diagram-Semantics"><span class="toc-number">1.</span> <span class="toc-text">Tape Diagram Semantics</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Surfacing-parallelism"><span class="toc-number">2.</span> <span class="toc-text">Surfacing parallelism</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Post-Scriptum"><span class="toc-number">3.</span> <span class="toc-text">Post Scriptum</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Starting-expression"><span class="toc-number">3.0.1.</span> <span class="toc-text">Starting expression</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Simplify-assignment-discard-and-apply-whiskering"><span class="toc-number">3.0.2.</span> <span class="toc-text">Simplify assignment (discard) and apply whiskering</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Whiskering-compose-and-Whiskering-convolution"><span class="toc-number">3.0.3.</span> <span class="toc-text">Whiskering compose and Whiskering convolution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Reordering-W7-in-4"><span class="toc-number">3.0.4.</span> <span class="toc-text">Reordering (W7 in [4])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Whiskering-compose"><span class="toc-number">3.0.5.</span> <span class="toc-text">Whiskering compose</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Definition-otimes"><span class="toc-number">3.0.6.</span> <span class="toc-text">Definition $\otimes$</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">4.</span> <span class="toc-text">References</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Surfacing parallelism in imperative programs
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">mstn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-26T07:00:00.000Z" class="dt-published" itemprop="datePublished">2025-04-26</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/applied-category-theory/" rel="tag">applied category theory</a>, <a class="p-category" href="/tags/compilers/" rel="tag">compilers</a>, <a class="p-category" href="/tags/optimization/" rel="tag">optimization</a>, <a class="p-category" href="/tags/tape-diagrams/" rel="tag">tape diagrams</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>In this post, I want to share some initial ideas on surfacing parallelism in code, drawing inspiration from the category theory framework introduced in [3] and [4]. My approach will be informal, prioritizing intuition over strict mathematical details to make these concepts more accessible to a broader audience, particularly software engineers. In fact, the potential benefits of this theory extend to practical areas like compiler design (e.g. [5] shows related ideas). While aiming for clarity, there might be simplifications or unintentional mistakes. Think of this as an idea-sharing session, and I’d love to hear your thoughts and reactions!</p>
+<p>Let’s look more closely at what I mean with the expression “surfacing parallelism” using a simple example. Consider the code snippet below,</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">x = <span class="number">10000</span></span><br><span class="line">y = <span class="number">10000</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> x &gt; <span class="number">0</span>:</span><br><span class="line">    x = x - <span class="number">1</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    x = x + <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> y &gt; <span class="number">0</span>:</span><br><span class="line">    y = y - <span class="number">1</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    y = y + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">x = x + y</span><br></pre></td></tr></table></figure>
+
+<p>It consists of two <code>if-then-else</code> blocks that may perform expensive operations. The second <code>if-then-else</code> is executed only after the computation of the former <code>if-then-else</code> has terminated. However, since the two <code>if-then-else</code> blocks are independent from each other (i.e., they work on different variables), we could run them in parallel. The problem we want to discuss here is how a sequential program can be rewritten into a semantically equivalent program where independent code blocks are carried out in parallel. We want to do that in order to speed up the overall computation. Indeed, we expect that two parallel heavy computations will run faster than when they are executed in sequence.</p>
+<p>Our working example is adapted and simplified from [1] where the author observed that surfacing parallelism can be done in a systematic way by applying precise rewrite rules to computer programs. This is possible thanks to an interesting algebraic duality between data and control (more later) that was discovered many decades ago in [2]. In the rest of this post, we will repropose a similar exercise in the more modern setting of tape diagrams [3] that simplifies our task a bit.</p>
+<h1 id="Tape-Diagram-Semantics"><a href="#Tape-Diagram-Semantics" class="headerlink" title="Tape Diagram Semantics"></a>Tape Diagram Semantics</h1><p>A context $\Gamma$ represents a binding between variable names and types. In our example, $\Gamma=x \in \mathit{Nat}, y \in \mathit{Nat}$. Sometimes, we are interested only in types; then we define a function $\epsilon$ that takes a context and returns only the type side of a context. For our choice of $\Gamma$ the type side is $\mathit{Nat} \times \mathit{Nat}$. If you are familiar with programming language theory, this is the gist of <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Lambda_calculus">alpha conversion</a>: variable names don’t change the semantics of a program so they are irrelevant for a computer (but they are not for humans!). </p>
+<p>Intuitively, commands define functions from $\epsilon(\Gamma)$ to $\epsilon(\Gamma)$. For example, <code>x = x - 1</code> corresponds to a function $\epsilon(\Gamma \vdash \mathit{x = x - 1})$ that takes values in $\mathit{Nat} \times \mathit{Nat}$ to values in $\mathit{Nat} \times \mathit{Nat}$. More precisely, $(n, m)$ is sent to $(n-1, m)$ for each $n$ and $m$ in $\mathit{Nat}$.</p>
+<p>We can represent functions of this type graphically using <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/String_diagram">string diagrams</a>. For <code>x = x - 1</code> we get the following diagram where, wires are types and boxes are functions or relations. Just for notational convenience, we label wires with their corresponding variables. </p>
+<p><img src="/images/surfacing-parallelism/assign.png"></p>
+<p>I think it is pretty intuitive. We need to read <code>x</code> and not <code>y</code> (that is why <code>y</code> is discarded) in order to evaluate the right hand side of the assignment. The result of the assignment overrides the original value of <code>x</code> and produce a new value. The value for <code>y</code> is copied over and sent to the inner context because we may need it for evaluating other expressions downstream.</p>
+<p>We can do the same for conditions like <code>x &gt; 0</code>. In this case, <code>x</code> is not overwritten by <code>x&gt;0</code>, but it is propagated to the inner context without any change. The predicate <code>x &gt; 0</code> is not a function, but a relation. If you want to understand how it works, please refer to [4]. The intuition here is that the diagram acts as a sort of filter, that is, it is defined for every value of <code>x</code> and <code>y</code> such that <code>x &gt; 0</code>, otherwise it is the empty relation.</p>
+<p><img src="/images/surfacing-parallelism/condition.png"></p>
+<p>These diagrams tell us how we operate on <em>data</em> and from now on we will call them <strong>data diagrams</strong>. In a computer program, we don’t have only data but also control flow. For example, we need to represent alternative flows of data when we execute an <code>if</code> statement. Intuitively, control is another “layer” that wraps data. In [3], the authors introduced the graphical language of tape diagrams where data diagrams are wrapped by a red tape. We call tape diagrams just <strong>control diagrams</strong> here to emphasize the application to the semantics of programming languages. The first <code>if-then-else</code> is represented as follows.</p>
+<p><img src="/images/surfacing-parallelism/alternative.png"></p>
+<p>The two juxtaposed control diagrams capture the idea of “alternative” computations. We run <em>either</em> the <code>then</code> branch or the <code>else</code> branch, but not both of them! This is different from two juxtaposed data diagrams that, instead represent, data independency, e.g. things that can happen at the same time. This is the duality between data and control we were referring to at the beginning.</p>
+<p>Now, if we put everything together, the control and data digram for our example is the diagram on the left in the picture below. Note that we introduced some special nodes for branching out and merging computations and we omitted the diagrams for the second <code>if-then-else</code> that are left as an exercise.</p>
+<img src="/images/surfacing-parallelism/example-as-diagram.png" width="70%" height="50%">
+
+
+<p>Tape diagrams are a special kind of algebra and can be manipulated applying some laws in the same way we used to do in highschool with polynomial equations. From a computational point of view, an algebra is nothing else than a data structure with some operations. For example, a rule says that, if we duplicate some data and then we discard one result, it is the same as doing nothing on the data. We can apply this rule to simplify our diagram a bit. For example, an assignment where some variables are not used can be simplified applying a rewrite rule as indicated below. </p>
+<p><img src="/images/surfacing-parallelism/monoid-rule.png"></p>
+<p>The result of applying this rule to our main example is shown in the above diagram on the right.</p>
+<p>Well, surfacing parallelism is something similar. We apply some rewrites to the diagrammatic representation of a computer program that preserve the semantics. In the next section, I’ll give the basic intuition. </p>
+<h1 id="Surfacing-parallelism"><a href="#Surfacing-parallelism" class="headerlink" title="Surfacing parallelism"></a>Surfacing parallelism</h1><p>In [3], the authors introduce the concept of whiskering. I think the original motivation for whiskering was to explain how the two monoidal structures of tape diagrams distribute over each other. However, if these words sound too obscure, it is more intuitive to think about whiskering as a sort of operator on diagrams that increases parallelism by interleaving computations. For example, suppose that we have the tape diagram on the left with context <code>x</code>, we can extend its context with <code>y</code> whiskering the diagram on the right (or on the left) obtaining the diagram on the right with context <code>xy</code>.  The new whisked diagram is “equivalent” to the original one because we don’t change what we do on <code>x</code> and we don’t do anything on <code>y</code>. So why is whiskering useful if nothing changed? It is useful because, after whiskering, we have an extended context <code>xy</code> and we can interleave computations over <code>x</code> with computations over <code>y</code>.</p>
+<p><img src="/images/surfacing-parallelism/whisk.png"></p>
+<p>Let’s consider a simple example of two parallel computations as in the following diagram (left). We use a green tape to highlight the fact that the left and the right are not alternative options, but they run in parallel.</p>
+<p><img src="/images/surfacing-parallelism/whiskering.png"></p>
+<p>What does “running in parallel” mean? Intuitively, two computations are parallelizable if the order of execution does not change the behavior. In other terms, left and right are parallel if we can run left and then right (center diagram) or right and then left (right diagram) without changing the result of the computation. </p>
+<p>Basically, we run the left and we do nothing on the right or vice versa; in other terms, we are whiskering. The patterns “do nothing on the left” and “do nothing on the right” are quite important and deserve their own notation: $L_U(t)$ and $R_U(t)$ where $t$ is a generic tape diagram.</p>
+<p>It is not too hard to convince ourselves than $L_U(t)$ (or $R_U(t)$) is the same as a data diagram when $t$ ends are not branching. Graphically, we have,</p>
+<p><img src="/images/surfacing-parallelism/left-right.png"></p>
+<p>Here, we list some of the rules for tape diagrams that we can apply to surface parallelism. Please note that those rules can be derived by smaller ones defined in [3] and [4]. Here, we want to show the rewrite patterns that we need to apply in order to parallelize our example. So the rules are not the smallest building blocks, nor the set is complete.</p>
+<p><img src="/images/surfacing-parallelism/parallel-rules.png"></p>
+<p>The final result is the following diagrams where we have two “parallel” <code>if-then-else</code> blocks as wanted.</p>
+<p><img src="/images/surfacing-parallelism/final.png"></p>
+<h1 id="Post-Scriptum"><a href="#Post-Scriptum" class="headerlink" title="Post Scriptum"></a>Post Scriptum</h1><p>In this post, I have tried to convey the intuition about these ideas. I must admit that I used a little poetic license to tell this story. I hope I will find some more time in the future for a more formal post, but I cannot promise anything.</p>
+<p>In [4] and [5], the green tapes do not exist in the graphical language of diagrams. There exists an operation $\otimes$ on tape terms that is what we wanted to represent as a green tape. In some sense, we can consider green tapes as syntactic sugar, but it might be convenient to represent them graphically because of their interpretation as “parallel” computation. I can anticipate that the green tape is useful to model <em>unstructured</em> programming languages (those with gotos); for <em>structured</em> programming languages it is not strictly required: I am going to talk about this stuff in another post.</p>
+<p>Finally, for the brave ones, I’ll copy here the algebraic expressions corresponding to the pictures. I don’t indend to explain their meaning, please read [4] and [5] if interested. I report them here just for my future myself. ;)</p>
+<h3 id="Starting-expression"><a href="#Starting-expression" class="headerlink" title="Starting expression"></a>Starting expression</h3><p>$\epsilon(\mathit{xy} \vdash \mathit{x=1});\epsilon(\mathit{xy} \vdash \mathit{y=1});$<br>$(c(\mathit{xy} \vdash \mathit{x&gt;0});\epsilon(\mathit{xy} \vdash \mathit{x=x-1})+c(\mathit{xy} \vdash \mathit{x&lt;=0});\epsilon(\mathit{xy} \vdash \mathit{x=x+1}));$<br>$(c(\mathit{xy} \vdash \mathit{y&gt;0});\epsilon(\mathit{xy} \vdash \mathit{y=y-1})+c(\mathit{xy} \vdash \mathit{y&lt;=0});\epsilon(\mathit{xy} \vdash \mathit{y=y+1}));$<br>$\epsilon(\mathit{xy} \vdash \mathit{x=x+y})$</p>
+<h3 id="Simplify-assignment-discard-and-apply-whiskering"><a href="#Simplify-assignment-discard-and-apply-whiskering" class="headerlink" title="Simplify assignment (discard) and apply whiskering"></a>Simplify assignment (discard) and apply whiskering</h3><p>$R_y \epsilon(\mathit{x} \vdash \mathit{x=1}); L_x \epsilon(\mathit{y} \vdash \mathit{y=1});$<br>$(R_y c(\mathit{x} \vdash \mathit{x&gt;0}); R_y \epsilon(\mathit{x} \vdash \mathit{x=x-1})+R_y c(\mathit{x} \vdash \mathit{x&lt;=0});R_y \epsilon(\mathit{x} \vdash \mathit{x=x+1}));$<br>$(L_x c(\mathit{y} \vdash \mathit{y&gt;0}); L_x \epsilon(\mathit{y} \vdash \mathit{y=y-1})+L_x c(\mathit{x} \vdash \mathit{y&lt;=0});L_x \epsilon(\mathit{y} \vdash \mathit{y=y+1}));$<br>$\epsilon(\mathit{xy} \vdash \mathit{x=x+y})$</p>
+<h3 id="Whiskering-compose-and-Whiskering-convolution"><a href="#Whiskering-compose-and-Whiskering-convolution" class="headerlink" title="Whiskering compose and Whiskering convolution"></a>Whiskering compose and Whiskering convolution</h3><p>$R_y \epsilon(\mathit{x} \vdash \mathit{x=1}); L_x \epsilon(\mathit{y} \vdash \mathit{y=1});$<br>$R_y (c(\mathit{x} \vdash \mathit{x&gt;0}); \epsilon(\mathit{x} \vdash \mathit{x=x-1})+c(\mathit{x} \vdash \mathit{x&lt;=0}); \epsilon(\mathit{x} \vdash \mathit{x=x+1}));$<br>$L_x (c(\mathit{y} \vdash \mathit{y&gt;0}); \epsilon(\mathit{y} \vdash \mathit{y=y-1})+c(\mathit{x} \vdash \mathit{y&lt;=0}); \epsilon(\mathit{y} \vdash \mathit{y=y+1}));$<br>$\epsilon(\mathit{xy} \vdash \mathit{x=x+y})$</p>
+<h3 id="Reordering-W7-in-4"><a href="#Reordering-W7-in-4" class="headerlink" title="Reordering (W7 in [4])"></a>Reordering (W7 in [4])</h3><p>$R_y \epsilon(\mathit{x} \vdash \mathit{x=1});$<br>$R_y (c(\mathit{x} \vdash \mathit{x&gt;0}); \epsilon(\mathit{x} \vdash \mathit{x=x-1})+c(\mathit{x} \vdash \mathit{x&lt;=0}); \epsilon(\mathit{x} \vdash \mathit{x=x+1}));$<br>$L_x \epsilon(\mathit{y} \vdash \mathit{y=1});$<br>$L_x (c(\mathit{y} \vdash \mathit{y&gt;0}); \epsilon(\mathit{y} \vdash \mathit{y=y-1})+c(\mathit{x} \vdash \mathit{y&lt;=0}); \epsilon(\mathit{y} \vdash \mathit{y=y+1}));$<br>$\epsilon(\mathit{xy} \vdash \mathit{x=x+y})$</p>
+<h3 id="Whiskering-compose"><a href="#Whiskering-compose" class="headerlink" title="Whiskering compose"></a>Whiskering compose</h3><p>$R_y (\epsilon(\mathit{x} \vdash \mathit{x=1});(c(\mathit{x} \vdash \mathit{x&gt;0}); \epsilon(\mathit{x} \vdash \mathit{x=x-1})+c(\mathit{x} \vdash \mathit{x&lt;=0}); \epsilon(\mathit{x} \vdash \mathit{x=x+1})));$<br>$L_x (\epsilon(\mathit{y} \vdash \mathit{y=1});(c(\mathit{y} \vdash \mathit{y&gt;0}); \epsilon(\mathit{y} \vdash \mathit{y=y-1})+c(\mathit{x} \vdash \mathit{y&lt;=0}); \epsilon(\mathit{y} \vdash \mathit{y=y+1})));$<br>$\epsilon(\mathit{xy} \vdash \mathit{x=x+y})$</p>
+<h3 id="Definition-otimes"><a href="#Definition-otimes" class="headerlink" title="Definition $\otimes$"></a>Definition $\otimes$</h3><p>$(\epsilon(\mathit{y} \vdash \mathit{y=1});(c(\mathit{y} \vdash \mathit{y&gt;0}); \epsilon(\mathit{y} \vdash \mathit{y=y-1})+c(\mathit{x} \vdash \mathit{y&lt;=0}); \epsilon(\mathit{y} \vdash \mathit{y=y+1})$<br>$\otimes \epsilon(\mathit{x} \vdash \mathit{x=1});(c(\mathit{x} \vdash \mathit{x&gt;0}); \epsilon(\mathit{x} \vdash \mathit{x=x-1})+c(\mathit{x} \vdash \mathit{x&lt;=0}); \epsilon(\mathit{x} \vdash \mathit{x=x+1}));$<br>$\epsilon(\mathit{xy} \vdash \mathit{x=x+y})$</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p>[1] Stefanescu, Gheorghe. Network algebra. Springer Science &amp; Business Media, 2000.</p>
+<p>[2] Bainbridge, Edwin S. “Feedback and generalized logic.” Information and Control 31.1 (1976): 75-96. <a target="_blank" rel="noopener" href="https://www.sciencedirect.com/science/article/pii/S0019995876903909/pdf?md5=c9bbc54c3bc1f4a1f1b1985173709cba&pid=1-s2.0-S0019995876903909-main.pdf">pdf</a></p>
+<p>[3] Bonchi, Filippo, Alessandro Di Giorgio, and Alessio Santamaria. “Deconstructing the calculus of relations with tape diagrams” Proceedings of the ACM on Programming Languages 7.POPL (2023): 1864-1894. <a target="_blank" rel="noopener" href="https://dl.acm.org/doi/pdf/10.1145/3571257">pdf</a></p>
+<p>[4] Bonchi, Filippo, Alessandro Di Giorgio, and Elena Di Lavore. “A Diagrammatic Algebra for Program Logics.” arXiv preprint arXiv:2410.03561 (2024). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2410.03561">pdf</a></p>
+<p>[5] Reissmann, Nico, et al. “RVSDG: An intermediate representation for optimizing compilers.” ACM Transactions on Embedded Computing Systems (TECS) 19.6 (2020): 1-28. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1912.05036">pdf</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Tape-Diagram-Semantics"><span class="toc-number">1.</span> <span class="toc-text">Tape Diagram Semantics</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Surfacing-parallelism"><span class="toc-number">2.</span> <span class="toc-text">Surfacing parallelism</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Post-Scriptum"><span class="toc-number">3.</span> <span class="toc-text">Post Scriptum</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Starting-expression"><span class="toc-number">3.0.1.</span> <span class="toc-text">Starting expression</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Simplify-assignment-discard-and-apply-whiskering"><span class="toc-number">3.0.2.</span> <span class="toc-text">Simplify assignment (discard) and apply whiskering</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Whiskering-compose-and-Whiskering-convolution"><span class="toc-number">3.0.3.</span> <span class="toc-text">Whiskering compose and Whiskering convolution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Reordering-W7-in-4"><span class="toc-number">3.0.4.</span> <span class="toc-text">Reordering (W7 in [4])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Whiskering-compose"><span class="toc-number">3.0.5.</span> <span class="toc-text">Whiskering compose</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Definition-otimes"><span class="toc-number">3.0.6.</span> <span class="toc-text">Definition $\otimes$</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">4.</span> <span class="toc-text">References</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2025/04/26/surfacing-parallelism/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&text=Surfacing parallelism in imperative programs"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&title=Surfacing parallelism in imperative programs"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&is_video=false&description=Surfacing parallelism in imperative programs"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Surfacing parallelism in imperative programs&body=Check out this article: https://mstn.github.io/2025/04/26/surfacing-parallelism/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&title=Surfacing parallelism in imperative programs"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&title=Surfacing parallelism in imperative programs"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&title=Surfacing parallelism in imperative programs"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&title=Surfacing parallelism in imperative programs"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2025/04/26/surfacing-parallelism/&name=Surfacing parallelism in imperative programs&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2025/04/26/surfacing-parallelism/&t=Surfacing parallelism in imperative programs"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    mstn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+ 
+  <link
+    rel="preload"
+    href="/lib/font-awesome/css/all.min.css"
+    as="style"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript
+    ><link
+      rel="stylesheet"
+      href="/lib/font-awesome/css/all.min.css"
+  /></noscript>
+
+
+    <!-- jquery -->
+
+  
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+
+
+
+<!-- clipboard -->
+
+  
+    
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

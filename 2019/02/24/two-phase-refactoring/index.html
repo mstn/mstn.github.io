@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Front end development has been changed a lot in the past decade. Not only frameworks have changed. The Web itself is now a very different place respect to ten years ago. Browsers are more powerful, we">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Two phase refactoring">
+<meta property="og:url" content="https://mstn.github.io/2019/02/24/two-phase-refactoring/index.html">
+<meta property="og:site_name" content="mstn&#39;s blog">
+<meta property="og:description" content="Front end development has been changed a lot in the past decade. Not only frameworks have changed. The Web itself is now a very different place respect to ten years ago. Browsers are more powerful, we">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-02-24T08:00:00.000Z">
+<meta property="article:modified_time" content="2025-04-21T06:52:27.136Z">
+<meta property="article:author" content="mstn">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="rails">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="refactoring">
+<meta property="article:tag" content="jquery">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Two phase refactoring</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="mstn&#39;s blog" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2019/07/25/performance-evaluation-and-refactoring/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2018/12/02/sketching-a-language-for-web-2/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2019/02/24/two-phase-refactoring/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&text=Two phase refactoring"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&title=Two phase refactoring"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&is_video=false&description=Two phase refactoring"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Two phase refactoring&body=Check out this article: https://mstn.github.io/2019/02/24/two-phase-refactoring/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&title=Two phase refactoring"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&title=Two phase refactoring"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&title=Two phase refactoring"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&title=Two phase refactoring"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&name=Two phase refactoring&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2019/02/24/two-phase-refactoring/&t=Two phase refactoring"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Two-Phase-Refactoring"><span class="toc-number">1.</span> <span class="toc-text">Two Phase Refactoring</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Refactoring-and-tests"><span class="toc-number">2.</span> <span class="toc-text">Refactoring and tests</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#When-what-you-should-not-refactor"><span class="toc-number">3.</span> <span class="toc-text">When&#x2F;what you should not refactor</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#A-case-study"><span class="toc-number">4.</span> <span class="toc-text">A case study</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vue-vs-React-vs-Something-else"><span class="toc-number">4.1.</span> <span class="toc-text">Vue vs React vs Something else</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Vue-instances"><span class="toc-number">4.2.</span> <span class="toc-text">Vue instances</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Inline-templates"><span class="toc-number">4.3.</span> <span class="toc-text">Inline templates</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Vue-components-as-jQuery-wrappers"><span class="toc-number">4.4.</span> <span class="toc-text">Vue components as jQuery wrappers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#VueX"><span class="toc-number">4.5.</span> <span class="toc-text">VueX</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Listening-to-DOM-changes"><span class="toc-number">4.6.</span> <span class="toc-text">Listening to DOM changes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Conclusion"><span class="toc-number">5.</span> <span class="toc-text">Conclusion</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Acknowledgements"><span class="toc-number">6.</span> <span class="toc-text">Acknowledgements</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">7.</span> <span class="toc-text">References</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Two phase refactoring
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">mstn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2019-02-24T08:00:00.000Z" class="dt-published" itemprop="datePublished">2019-02-24</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/jquery/" rel="tag">jquery</a>, <a class="p-category" href="/tags/rails/" rel="tag">rails</a>, <a class="p-category" href="/tags/refactoring/" rel="tag">refactoring</a>, <a class="p-category" href="/tags/vue/" rel="tag">vue</a>, <a class="p-category" href="/tags/web/" rel="tag">web</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>Front end development has been changed a lot in the past decade.</p>
+<p>Not only frameworks have changed. The Web itself is now a very different place respect to ten years ago. Browsers are more powerful, we can compute a lot of stuff on the client side. Mobile is a reality. Users expect more advanced fluid interactions with web applications.</p>
+<p>Nevertheless, many existing web applications are still tightly bound to old technologies and approaches, in particular on the client side. </p>
+<p>Upgrading your stack is not just a matter to follow the current hype. A modern technology can give also real benefits. In particular, it could impact on user satisfaction, performances, conversion rates and Google ranking. This means more profits and more money for many companies.</p>
+<p>The engineering saying “if it works, don’t change it” is probably the main reason to resist to change. Indeed, the cost of a full rewrite is too high and too risky. For example, many business rules are wired into the legacy code. Moreover, we should understand how to leverage the existing assets and team expertise/skill sets more than distrupting the current state of things.</p>
+<p>Hence, when we approach a legacy system to introduce a new technology, we need to incrementally refactor the existing code base. In a first phase, we need to prepare the code base to change and, only after that, we can apply changes. I call this process “two-phase refactoring”.</p>
+<p>In the rest of this post, I will discuss what two-phase refactoring is with some examples from a project I have worked on lately. We discuss a case study where we want to migrate a legacy Rails app to Vue on the client side. We show how Vue can be adopted incrementally and how it can be a good fit for a two-phase refactoring.</p>
+<h1 id="Two-Phase-Refactoring"><a href="#Two-Phase-Refactoring" class="headerlink" title="Two Phase Refactoring"></a>Two Phase Refactoring</h1><p>Martin Folwer, in his famous book [1], defines refactoring as a process where code is changed in small steps that leave functionalities unchanged. He focuses on the description of syntactic techninques, which should help to indentify and reduce bad smells, that is, possibly problematic pieces of code.</p>
+<p>While introducing a new technology, the techniques we need to apply are similar to Fowler’s ones. However, we are not simply transforming the existing code base to improve some code metric. We are replacing part of the stack with another one. New technologies can be foundamentally different in many different aspects. For example, <code>jQuery</code> is imperative while <code>Vue</code> is declarative and compositional. </p>
+<p>Hence, introducing a new technology is harder than traditional refactoring.</p>
+<p>A new technology cannot be just dropped there. Migration should be approached in two ideal phases.</p>
+<p>The first phase of refactoring consists of reorganizing the code, without altering functionalities, in such a way to make the transition possible. The second phase is implementing the transition.</p>
+<p>For example, consider the scenario where server interactions are handled by functions bound to html events (e.g. <code>&lt;a onClick=...&gt;</code>) and implemented with <code>jQuery.ajax</code> calls. In order to decouple presentation from network layer and model, we want to bind “actions” to dom and delegate the actual communication to another component.  We would like to get rid of <code>jQuery</code>, too. There are faster alternatives with smaller footprints. However, the legacy code might be very entangled with <code>jQuery</code> and so we cannot remove it in a small simple step. What we can do is to extract and move the <code>jQuery</code> logic to some methods (like in Fowler’s “extract method” technique). We do not change the underlying communication mechanism, but the first refactoring step enables us to prepare the code for a better solution.</p>
+<h1 id="Refactoring-and-tests"><a href="#Refactoring-and-tests" class="headerlink" title="Refactoring and tests"></a>Refactoring and tests</h1><p>Solid tests are a pre-requisite for any sort of refactoring. However, a good test suite is not enough when we migrate to a new technology. Even when feature test coverage is good, every change should be pass through (manual) QA. </p>
+<p>For example, in the example above, if we remove <code>jQuery</code> in one shot, several features are affected at the same time. Instead, if we firstly extract methods, we can pass changes through QA because they are feature based.</p>
+<h1 id="When-what-you-should-not-refactor"><a href="#When-what-you-should-not-refactor" class="headerlink" title="When/what you should not refactor"></a>When/what you should not refactor</h1><p>There is no need to refactor all the legacy code. We do not want to change things that has been worked for a so long time. Old and new technologies can often co-exist without too much overhead. Thus, when it is possible, we can leave the legacy code untouched.</p>
+<h1 id="A-case-study"><a href="#A-case-study" class="headerlink" title="A case study"></a>A case study</h1><p>This case study is based on some real working experience.</p>
+<p>Assume we want to refactor a webshop visited by thousands of users. The stack is Ruby on Rails with some unstructured jQuery on the client side. </p>
+<p>We do not want to rewrite the whole application. It is too impractical since the code base is very large. Moreover, the team has a great expertise in Rails programming. So we want to leverage the existing assets more than turning the app upside down.</p>
+<p>The main problem is to avoid business logic duplication. Business logic is codified on the server side. We do not want to duplicate logic on the client because it would be hard to maintain. In addition many business rules are tacit and encoded in software. </p>
+<p>Since the team has developed a lot of expertise with Rails rendering, we stick to Rails as a rendering engine. We want to render HTML on the server, mainly for SEO reasons. However, although Rails can render Vue components on server side (e.g. <a target="_blank" rel="noopener" href="https://github.com/samtgarson/vueport">vueport</a>), it does not make sense to ask the team to learn something different.  </p>
+<p>Finally, we want to adopt Vue incrementally. Vue and the legacy Javascript code should co-exist for a while. The main reason is that we want to release new features implemented with Vue as soon as possible. We do not want to wait to replace the legacy code with something else before publishing the outcome of the refactoring. </p>
+<h2 id="Vue-vs-React-vs-Something-else"><a href="#Vue-vs-React-vs-Something-else" class="headerlink" title="Vue vs React vs Something else"></a>Vue vs React vs Something else</h2><p>The choice of Vue is made after some considerations. To sum up, Vue seems more flexible than its direct competitor, that is, React. </p>
+<p>We need to bind components to pre-rendered DOMs. It is easier to bind Vue components to existing DOM elements. React-based alternatives are <a target="_blank" rel="noopener" href="https://github.com/facebook/react/issues/7712#issuecomment-360599550">not robust enough</a>.</p>
+<p>We do not have to stick to a single template language, i.e. JSX. Although it is possible to use <a target="_blank" rel="noopener" href="https://reactjs.org/docs/react-without-jsx.html">React without JSX</a>, Vue is much more flexible and easy to use with different template languages.</p>
+<p>We could have considered other technologies, such as <a target="_blank" rel="noopener" href="https://github.com/stimulusjs/stimulus">stimulus.js</a>. Stimulus is quite popular in Rails community and it is a good tool. Nevertheless, we opt for Vue because it should scale better for larger projects. We do not want only to make some html smarter, but also to implement some serious inter-component communication. Vue seems more mature and complete on this front.</p>
+<h2 id="Vue-instances"><a href="#Vue-instances" class="headerlink" title="Vue instances"></a>Vue instances</h2><p>In order to reduce the risk of breaking things, we want to start Vue only when is strictly necessary. Vue instances could be a way to restrict and control which regions are affected by the refactoring.</p>
+<p>The first phase of refactoring consists of identifying which regions we are going to change. In the second phase, we can move towards a single Vue instance for the whole application, as it is common. However, having - firstly - more instances allow us to disable Vue for page sections without Vue templates.</p>
+<p>For example, a legacy carousel component has problems with Vue because of some embedded Javascript code. Carousel instances are ubiquitous in the web application. We build a Vue version of the carousel component and we enable it page by page after careful testing.</p>
+<h2 id="Inline-templates"><a href="#Inline-templates" class="headerlink" title="Inline templates"></a>Inline templates</h2><p>In order to keep rendering performed by Ruby on server, we use <code>inline-template</code>s and attach logic to existing html with Vue.</p>
+<p>In this way, we can use <code>props</code> to pass data from Ruby to Javascript (a well-known technique) and still use Ruby for <code>i18n</code>, rendering and business logic.</p>
+<p>We know that <code>inline-template</code>s could have <a target="_blank" rel="noopener" href="https://vuejs.org/v2/guide/components.html#DOM-Template-Parsing-Caveats">some parsing caveats</a>. Thus, <code>inline-template</code> are not the best solution.</p>
+<p>However, the legacy app is not organized in components. With <code>inline-template</code>, we can start to identify some common html patterns as component candidates. So marking existing html with <code>inline-template</code> could be the first step in a two-step refactoring that enables the migration toward a more compositional UI architecture.</p>
+<h2 id="Vue-components-as-jQuery-wrappers"><a href="#Vue-components-as-jQuery-wrappers" class="headerlink" title="Vue components as jQuery wrappers"></a>Vue components as jQuery wrappers</h2><p>We can wrap existing <code>jQuery</code> into Vue components. There is no need to rewrite <code>jQuery</code> logic from scratch in the first phase. However, we can isolate <code>jQuery</code> in Vue lifecycles. For example, let us assume we have a phone number validator base on <code>jquery.validate</code>. In the long term, we want to get rid of <code>jquery.validate</code> and the phone validation library. However, for now we need to keep them.</p>
+<p>The first phase is to isolate this legacy code in a Vue component, let’s say, <code>&lt;with-legacy-phone-validation/&gt;</code>. The new component lifecycle methods bind and unbind jQuery events (see for example <a target="_blank" rel="noopener" href="https://www.smashingmagazine.com/2018/02/jquery-vue-javascript/">this tutorial</a>). The old code can be copied “almost” verbatim. </p>
+<p>In this way, we have identified which parts are affected by the old validation. It would be easier to remove <code>jquery.validate</code> in a second phase.</p>
+<h2 id="VueX"><a href="#VueX" class="headerlink" title="VueX"></a>VueX</h2><p>In order to avoid business logic duplication, the client state should be created and updated by the server following business rules. In this way, the client does not have to know any business logic.</p>
+<p>Since we need a global state on the client, VueX is the most natural tool to choose to handle client state.</p>
+<p>Another benefit of VueX is the possibility to pre-fetch client state. In other words, a <code>script</code> tag with some <code>json</code> is injected in the body of an html page. Some javascript fetches this <code>json</code> and initializes the state.</p>
+<p>The technique is often used to save a client-server round trip and for server side rendering. In this context, it is used also as another way to pass information from Ruby to Javascript without using <code>props</code>. </p>
+<p>Passing data via <code>props</code> is simple and is the right things to do in many cases. However, it is not suitable if data are not just string, but have types like <code>json</code> or <code>number</code>. In this case a component should parse the data and it could be quite cumbersome to see.</p>
+<h2 id="Listening-to-DOM-changes"><a href="#Listening-to-DOM-changes" class="headerlink" title="Listening to DOM changes"></a>Listening to DOM changes</h2><p>The legacy code can change DOM in two ways. The first one is using <code>jQuery</code>, but this usually works quite well with Vue. The second is through server responses. </p>
+<p>For historical reasons, dynamic client behavior is implemented with server ajax calls returning a javascript code to be executed on the client. For example, when an item is added to basket, the server returns some javascript to update the basket counter.</p>
+<p>Of course, this technique is not very nice because it violates the “separation of concerns” principle. As part of the refactoring we want to move from this approach to a more clean data-only API way. However, since we want to adopt Vue incrementally, we have to cope with this.</p>
+<p>The main problem is that javascript updates could destroy Vue instances. The solution is to listen to dom changes and recreate Vue instances if they are destroyed. Technically, we use the <a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver">W3C Mutation API</a>, which are supported by all browsers today.</p>
+<p>The limitation of this approach is that it does not work for arbitrary dom changes. For example, a Javascript update could destroy the DOM listener! So we must hope that the Rails app is designed in a smart way so that Javascript updates always and only occur for the same portion of the HTML page.</p>
+<h1 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h1><p>Introducing a new technology in a legacy app is challenging. The new technology cannot be just dropped into the existing code. </p>
+<p>We should approach refactoring in two macro phases. First, we need to prepare the code to migration and then implement the migration. The first phases should consist of small QAable/feature based steps.</p>
+<p>We discussed some examples from a case study where we want to add Vue to a legacy Rails app. </p>
+<p>Vue is good for this end since it can be incrementally adopted and fits well into a two-phase refactoring.</p>
+<h1 id="Acknowledgements"><a href="#Acknowledgements" class="headerlink" title="Acknowledgements"></a>Acknowledgements</h1><p>Many thanks to the team at <a target="_blank" rel="noopener" href="https://purepoint.io/">Purepoint</a>. I learnt a lot from discussions and criticisms. This blog post has been adapted from some internal documents I prepared. </p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p>[1] Martin Fowler, Refactoring: Improving the Design of Existing Code, 1999</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Two-Phase-Refactoring"><span class="toc-number">1.</span> <span class="toc-text">Two Phase Refactoring</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Refactoring-and-tests"><span class="toc-number">2.</span> <span class="toc-text">Refactoring and tests</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#When-what-you-should-not-refactor"><span class="toc-number">3.</span> <span class="toc-text">When&#x2F;what you should not refactor</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#A-case-study"><span class="toc-number">4.</span> <span class="toc-text">A case study</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vue-vs-React-vs-Something-else"><span class="toc-number">4.1.</span> <span class="toc-text">Vue vs React vs Something else</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Vue-instances"><span class="toc-number">4.2.</span> <span class="toc-text">Vue instances</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Inline-templates"><span class="toc-number">4.3.</span> <span class="toc-text">Inline templates</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Vue-components-as-jQuery-wrappers"><span class="toc-number">4.4.</span> <span class="toc-text">Vue components as jQuery wrappers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#VueX"><span class="toc-number">4.5.</span> <span class="toc-text">VueX</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Listening-to-DOM-changes"><span class="toc-number">4.6.</span> <span class="toc-text">Listening to DOM changes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Conclusion"><span class="toc-number">5.</span> <span class="toc-text">Conclusion</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Acknowledgements"><span class="toc-number">6.</span> <span class="toc-text">Acknowledgements</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">7.</span> <span class="toc-text">References</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2019/02/24/two-phase-refactoring/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&text=Two phase refactoring"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&title=Two phase refactoring"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&is_video=false&description=Two phase refactoring"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Two phase refactoring&body=Check out this article: https://mstn.github.io/2019/02/24/two-phase-refactoring/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&title=Two phase refactoring"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&title=Two phase refactoring"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&title=Two phase refactoring"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&title=Two phase refactoring"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2019/02/24/two-phase-refactoring/&name=Two phase refactoring&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2019/02/24/two-phase-refactoring/&t=Two phase refactoring"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    mstn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+ 
+  <link
+    rel="preload"
+    href="/lib/font-awesome/css/all.min.css"
+    as="style"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript
+    ><link
+      rel="stylesheet"
+      href="/lib/font-awesome/css/all.min.css"
+  /></noscript>
+
+
+    <!-- jquery -->
+
+  
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+
+
+
+<!-- clipboard -->
+
+  
+    
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

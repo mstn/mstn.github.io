@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Dependent types are types whose definition depends on a value (from Wikipedia). Typescript does not support dependent types per se. However, literal types, even if they are not actual values, allow us">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fixed size arrays in Typescript">
+<meta property="og:url" content="https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/index.html">
+<meta property="og:site_name" content="mstn&#39;s blog">
+<meta property="og:description" content="Dependent types are types whose definition depends on a value (from Wikipedia). Typescript does not support dependent types per se. However, literal types, even if they are not actual values, allow us">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-06-08T07:00:00.000Z">
+<meta property="article:modified_time" content="2025-04-21T06:52:27.136Z">
+<meta property="article:author" content="mstn">
+<meta property="article:tag" content="typescript">
+<meta property="article:tag" content="dependent types">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Fixed size arrays in Typescript</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="mstn&#39;s blog" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2018/07/06/weekly-digest-272018/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2018/06/06/hello-world/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&text=Fixed size arrays in Typescript"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&title=Fixed size arrays in Typescript"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&is_video=false&description=Fixed size arrays in Typescript"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Fixed size arrays in Typescript&body=Check out this article: https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&title=Fixed size arrays in Typescript"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&title=Fixed size arrays in Typescript"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&title=Fixed size arrays in Typescript"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&title=Fixed size arrays in Typescript"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&name=Fixed size arrays in Typescript&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&t=Fixed size arrays in Typescript"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Credits"><span class="toc-number">1.</span> <span class="toc-text">Credits</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#References"><span class="toc-number">2.</span> <span class="toc-text">References</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#More-resources"><span class="toc-number">3.</span> <span class="toc-text">More resources</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Fixed size arrays in Typescript
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">mstn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2018-06-08T07:00:00.000Z" class="dt-published" itemprop="datePublished">2018-06-08</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/dependent-types/" rel="tag">dependent types</a>, <a class="p-category" href="/tags/typescript/" rel="tag">typescript</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>Dependent types are types whose definition depends on a value (from Wikipedia).</p>
+<p>Typescript does not support dependent types <em>per se</em>. However, literal types, even if they are not actual values, allow us to do some interesting things.</p>
+<p>For instance, a classical introductory example to dependent types involves the definition of arrays of fixed length. It turns out that we can define, with some limitations, a type for arrays of fixed size in Typescript, too.</p>
+<p>Let’s see in details what we are going to replicate in Typescript.</p>
+<p>In many modern programming language, it is possible to define arrays whose elements have a given type, let’s say strings. In Typescript, we write:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="attr">a</span>: <span class="title class_">Array</span>&lt;string&gt;;</span><br><span class="line">a = []; <span class="comment">// ok</span></span><br><span class="line">a = [ <span class="string">&#x27;a&#x27;</span> ]; <span class="comment">// ok</span></span><br><span class="line">a = [ <span class="literal">true</span> ]; <span class="comment">// type error!</span></span><br></pre></td></tr></table></figure>
+
+<p>Dependent types parametrize type definition by values of another type. In the case of arrays we can define arrays of fixed size, for example:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="attr">a</span>: <span class="title class_">Array</span>&lt;<span class="number">2</span>, string&gt;;</span><br><span class="line">a = [ <span class="string">&#x27;a&#x27;</span>, <span class="string">&#x27;b&#x27;</span> ]; <span class="comment">// ok</span></span><br><span class="line">a = [ <span class="string">&#x27;a&#x27;</span> ]; <span class="comment">// type error!</span></span><br></pre></td></tr></table></figure>
+
+<p>In the example above, the size of arrays is checked at compile time. This means that, if a program compiles correctly, then we will not have a runtime exception because the size of the array is always what we expect.</p>
+<p>I created an <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/fixed-size-array">npm package</a> with the type definition. It boils down to <a target="_blank" rel="noopener" href="https://github.com/mstn/fixed-size-array/">few lines of code</a>.</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">type <span class="title class_">FixedSizeArray</span>&lt;N <span class="keyword">extends</span> number, T&gt; = N <span class="keyword">extends</span> <span class="number">0</span> ? never[] : &#123;</span><br><span class="line">    <span class="number">0</span>: T;</span><br><span class="line">    <span class="attr">length</span>: N;</span><br><span class="line">&#125; &amp; <span class="title class_">ReadonlyArray</span>&lt;T&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>Let’s see in details why and when it works.</p>
+<p>First, we use the trick introduced in Typescript 2.7 for fixed size tuples. The <code>length</code> of an array has a numeric literal type. We need it to match tuples of exact size.</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="attr">d</span>: <span class="title class_">FixedSizeArray</span>&lt;<span class="number">2</span>, string&gt;;</span><br><span class="line"></span><br><span class="line">d = [ <span class="string">&#x27;a&#x27;</span>, <span class="string">&#x27;b&#x27;</span> ]; <span class="comment">// ok</span></span><br><span class="line">d = [ <span class="string">&#x27;a&#x27;</span> ]; <span class="comment">// type error</span></span><br><span class="line">d = [ <span class="string">&#x27;a&#x27;</span>, <span class="string">&#x27;b&#x27;</span>, <span class="string">&#x27;c&#x27;</span> ]; <span class="comment">// type error</span></span><br></pre></td></tr></table></figure>
+
+<p>The intersection with <code>ReadonlyArray&lt;T&gt;</code> is needed to enforce the type of the array elements to be <code>T</code>. In addition, fixed size arrays inherit methods of <code>ReadonlyArray</code>.</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">d = [<span class="string">&#x27;a&#x27;</span>, <span class="literal">true</span>]; <span class="comment">// type error</span></span><br><span class="line">d = [<span class="literal">true</span>, <span class="string">&#x27;a&#x27;</span>]; <span class="comment">// type error</span></span><br></pre></td></tr></table></figure>
+
+<p>We use conditional types (Typescript &gt;=2.8) for handling zero length arrays. In Typescript (&gt;= 2.8) the type of <code>[]</code> is always <code>never[]</code>; so, if <code>N</code> is <code>0</code>, the type must be <code>never[]</code>.</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="attr">e</span>: <span class="title class_">FixedSizeArray</span>&lt;<span class="number">0</span>, string&gt;;</span><br><span class="line"></span><br><span class="line">e = []; <span class="comment">// ok</span></span><br><span class="line">e = [ <span class="string">&#x27;a&#x27;</span> ]; <span class="comment">// type error</span></span><br><span class="line">e = [] <span class="keyword">as</span> string[]; <span class="comment">// type error</span></span><br></pre></td></tr></table></figure>
+
+<p>Finally, property <code>0</code> is required because we can assign tuples only to tuple-like objects and a tuple-like object must have at least <code>0</code> defined by design (<a target="_blank" rel="noopener" href="https://github.com/Microsoft/TypeScript/issues/24680#issuecomment-394616609">source</a>).</p>
+<p>As pointed out by @AnyhowStep <a target="_blank" rel="noopener" href="https://github.com/Microsoft/TypeScript/issues/24680#issuecomment-394710740">here</a>, we can see the limitations of this approach when we try to access elements through their indexes.</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="attr">a</span>: <span class="title class_">FixedSizeArray</span>&lt;<span class="number">2</span>, string&gt;;</span><br><span class="line">a = [ <span class="string">&#x27;1&#x27;</span>, <span class="string">&#x27;2&#x27;</span> ]; <span class="comment">// ok</span></span><br><span class="line">a[<span class="number">0</span>] = <span class="string">&#x27;1&#x27;</span>; <span class="comment">// ok</span></span><br><span class="line">a[<span class="number">1</span>] = <span class="string">&#x27;2&#x27;</span>; <span class="comment">// type error, but it should be ok</span></span><br></pre></td></tr></table></figure>
+
+<p>Another more complex example showing the same problem with <code>keyof</code> type constructor.</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">type <span class="title class_">Range</span>&lt;N <span class="keyword">extends</span> number&gt; = keyof <span class="title class_">FixedSizeArray</span>&lt;<span class="number">2</span>, string&gt;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="attr">r</span>: <span class="title class_">Range</span>&lt;<span class="number">2</span>&gt;; <span class="comment">// it is &#x27;0&#x27; | &#x27;length&#x27; | ... (read only array props)</span></span><br><span class="line"></span><br><span class="line">r = <span class="string">&#x27;length&#x27;</span>;</span><br><span class="line">r = <span class="string">&#x27;0&#x27;</span>;</span><br><span class="line">r = <span class="string">&#x27;1&#x27;</span>; <span class="comment">// error! I would not expect an error</span></span><br></pre></td></tr></table></figure>
+
+<p>A better implementation could use <a target="_blank" rel="noopener" href="https://github.com/Microsoft/TypeScript/issues/15480">range types</a>. At the moment Typescript does not support range types and, as far as I know, range types are not on their roadmap in any near future. However, if we had a <code>range</code> operator similar to <code>keyof</code> operator, we could fix the problem above and simplify the definition with:</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">FixedSizeArray</span>&lt;U <span class="keyword">extends</span> <span class="built_in">number</span>, T&gt; = &#123;</span><br><span class="line">    [k <span class="keyword">in</span> <span class="title function_">range</span>(U)]: T;</span><br><span class="line">&#125; &amp; &#123; <span class="attr">length</span>: U &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>Another limitation is that it is not possible to do any arithmetic with numeric literal types in Typescript. Apparently, Typescript developers have found some <a target="_blank" rel="noopener" href="https://github.com/Microsoft/TypeScript/issues/8112">technical problems</a>. It is a pity! With numeric literal type arithmetic we could define, for example, that <code>insert</code> applied to an array of length <code>N</code> will return an array of lenght <code>N+1</code>. Since this is not possible for now, we have to stick to immutable arrays.</p>
+<p>Compared with the full firepower of dependent types, our arrays seem a little thing. Still, having a type for immutable arrays of a given length is a lovely feature to have in many practical cases. For example, in React we could specify the exact number of children a parent can have. Another example is a function that requires two array arguments of the same length.</p>
+<p>I wonder if we can find any hacks for current limitations without introducing new constructs to the language.</p>
+<p>A common criticism to dependent types is that they are quite complex to handle for humble programmers. Hence, I think it is interesting to see which features of dependent types can be expressed or mimicked in a programming language without importing all their complexity.</p>
+<p>It would be interesting to understand if we can prove “theorems” on Typscript programs using its type system in a similar way to what is done in dependent type languages. <a target="_blank" rel="noopener" href="https://github.com/tycho01">Tycho</a> has been developing <a target="_blank" rel="noopener" href="https://github.com/tycho01/typical">an experimental library</a> of type-level operations for TypeScript. I think it could be a good starting point.</p>
+<h2 id="Credits"><a href="#Credits" class="headerlink" title="Credits"></a>Credits</h2><p>Numeric literals for array length has been used for tuples <a target="_blank" rel="noopener" href="https://github.com/Microsoft/TypeScript/pull/17765">since TS 2.7</a>.</p>
+<p>Type definition had been simplified as suggested <a target="_blank" rel="noopener" href="https://github.com/Microsoft/TypeScript/issues/6229#issuecomment-376988681">here</a> by @tycho01.</p>
+<p>Daniel explained me better how typing works with tuples <a target="_blank" rel="noopener" href="https://github.com/Microsoft/TypeScript/issues/24680#issuecomment-394616609">here</a>.</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>Wikipedia, <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Dependent_type">Dependent Type</a>, accessed 10/04/2018</p>
+<h2 id="More-resources"><a href="#More-resources" class="headerlink" title="More resources"></a>More resources</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/mstn/fixed-size-array/">Source code</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.npmjs.com/package/fixed-size-array">NPM package</a></li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Credits"><span class="toc-number">1.</span> <span class="toc-text">Credits</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#References"><span class="toc-number">2.</span> <span class="toc-text">References</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#More-resources"><span class="toc-number">3.</span> <span class="toc-text">More resources</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&text=Fixed size arrays in Typescript"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&title=Fixed size arrays in Typescript"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&is_video=false&description=Fixed size arrays in Typescript"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Fixed size arrays in Typescript&body=Check out this article: https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&title=Fixed size arrays in Typescript"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&title=Fixed size arrays in Typescript"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&title=Fixed size arrays in Typescript"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&title=Fixed size arrays in Typescript"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&name=Fixed size arrays in Typescript&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2018/06/08/fixed-size-arrays-in-typescript/&t=Fixed size arrays in Typescript"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    mstn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+ 
+  <link
+    rel="preload"
+    href="/lib/font-awesome/css/all.min.css"
+    as="style"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript
+    ><link
+      rel="stylesheet"
+      href="/lib/font-awesome/css/all.min.css"
+  /></noscript>
+
+
+    <!-- jquery -->
+
+  
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+
+
+
+<!-- clipboard -->
+
+  
+    
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

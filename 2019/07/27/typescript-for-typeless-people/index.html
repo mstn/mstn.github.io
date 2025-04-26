@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Typescript is becoming very popular. It is one of the ten most used languages on Github and its adoption has increased a lot in the past years (source). The success of Typescript is in part due to the">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Typescript for typeless people">
+<meta property="og:url" content="https://mstn.github.io/2019/07/27/typescript-for-typeless-people/index.html">
+<meta property="og:site_name" content="mstn&#39;s blog">
+<meta property="og:description" content="Typescript is becoming very popular. It is one of the ten most used languages on Github and its adoption has increased a lot in the past years (source). The success of Typescript is in part due to the">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-07-27T07:00:00.000Z">
+<meta property="article:modified_time" content="2025-04-21T06:52:27.136Z">
+<meta property="article:author" content="mstn">
+<meta property="article:tag" content="typescript">
+<meta property="article:tag" content="software engineering">
+<meta property="article:tag" content="type theory">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Typescript for typeless people</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="mstn&#39;s blog" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/07/26/on-order-in-distributed/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2019/07/25/performance-evaluation-and-refactoring/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&text=Typescript for typeless people"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&title=Typescript for typeless people"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&is_video=false&description=Typescript for typeless people"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Typescript for typeless people&body=Check out this article: https://mstn.github.io/2019/07/27/typescript-for-typeless-people/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&title=Typescript for typeless people"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&title=Typescript for typeless people"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&title=Typescript for typeless people"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&title=Typescript for typeless people"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&name=Typescript for typeless people&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&t=Typescript for typeless people"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Types-are-just-a-tool"><span class="toc-number">1.</span> <span class="toc-text">Types are just a tool</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#To-type-or-not-to-type-that%E2%80%99s-the-wrong-question"><span class="toc-number">2.</span> <span class="toc-text">To type or not to type: that’s the (wrong) question</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#A-little-type-theory"><span class="toc-number">3.</span> <span class="toc-text">A little type theory</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Typescript-is-lightweight-if-used-wisely-imo"><span class="toc-number">4.</span> <span class="toc-text">Typescript is lightweight, if used wisely (imo)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Where-Typescript-is-useful"><span class="toc-number">5.</span> <span class="toc-text">Where Typescript is useful</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#When-Typescript"><span class="toc-number">6.</span> <span class="toc-text">When Typescript</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Where-Typescript-is-bad"><span class="toc-number">7.</span> <span class="toc-text">Where Typescript is bad</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Conclusions"><span class="toc-number">8.</span> <span class="toc-text">Conclusions</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Typescript for typeless people
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">mstn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2019-07-27T07:00:00.000Z" class="dt-published" itemprop="datePublished">2019-07-27</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/software-engineering/" rel="tag">software engineering</a>, <a class="p-category" href="/tags/type-theory/" rel="tag">type theory</a>, <a class="p-category" href="/tags/typescript/" rel="tag">typescript</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>Typescript is becoming very popular. It is one of the ten most used languages on Github and its adoption has increased a lot in the past years (<a target="_blank" rel="noopener" href="https://hackernoon.com/major-programming-trends-to-prepare-for-in-2019-169987cc75f4">source</a>). The success of Typescript is in part due to the current trend in software engineering that rediscovered types. Strongly typeness and safety have become desirable properties of our programming languages to such a point that the terms are often used in an improper way, like marketing buzzwords, and types have acquired thaumaturgical qualities, like producing bug-free code or transforming frogs into 10x programmers.</p>
+<h1 id="Types-are-just-a-tool"><a href="#Types-are-just-a-tool" class="headerlink" title="Types are just a tool"></a>Types are just a tool</h1><p>I am old enough to remember the times when types were considered harmful. Thus, I am very skeptic when people rediscover a technology or an idea.</p>
+<p>Some common objections against types were and are:</p>
+<ul>
+<li>Types add overhead and reduce productivity.</li>
+<li>There is no real case when you absolutely need them.</li>
+</ul>
+<p>I generally agree that these opinions are <em>sometimes</em> true.</p>
+<p>I do not think that <em>any</em> silver-bullet can increase productivity. Software production is a complex process where several factors come into play and a single technology, methodology or tools are not enough to determine the fate of a project.</p>
+<p>Actually, some tools can increase programming productivity. I think that it is “scientifically” proved that big screens can.<br>If I have to choose between a big screen and a typed language, I will choose the former without any doubt.<br>However, a tool is useful if you use it in the right way.<br>If you sit on your monitor instead of watching it, it won’t increase your productivity at all.<br>You should also switch it on, at least I was told so.</p>
+<p>Types are tools like big screens. However, they are more sophisticated than a monitor.<br>This means that it could be difficult to find the right way to use them. And, on the other side, it is easier to be overwhelmed by them.</p>
+<h1 id="To-type-or-not-to-type-that’s-the-wrong-question"><a href="#To-type-or-not-to-type-that’s-the-wrong-question" class="headerlink" title="To type or not to type: that’s the (wrong) question"></a>To type or not to type: that’s the (wrong) question</h1><p>There is also a second aspect. What do we mean with “types”? How many different ways to use types in programming languages exist?</p>
+<p>Programmers have a binary view of the world: good and bad, 0 and 1. When they evaluate a tool, they tend to manifest<br>strong opinions (like me in this post maybe): “it is crap” or “it is awesome”. But life is usually more complex than that.</p>
+<p>The real question is not “to type or not to type”.<br>Types are not a binary feature of programming languages. It does not make sense to talk about typeful and typeless<br>because it is not the case that a language can be with or without types.</p>
+<p>All programming languages have a type system. But all type systems are different.</p>
+<p>I think that the hostility against types has historical roots. Around 2008 people started to complain about types and the typeless revolution began.<br>In my opinion, that was not a revolt against all type systems, but against Java. Java was the language taught in universities and used in industry.<br>It came with the promise of a better world. In reality it carried to us only a heavy type system.</p>
+<p>I did not like Java. I do not know if things improved over there. I am biased toward it and probably what I say is unfair.<br>However, I think that some of the objections against types are objections against Java/C++/C# type systems.<br>As such I agree with them.</p>
+<p>Something similar happened in the database land. In the same years, people got fed up with the traditional databases, that is, SQL.<br>A lot of new paradigms emerged. A few of them survived (e.g. MongoDB) with criticisms and we are rediscovering now that SQL was not that bad.<br>In this case, in my opinion, the war was not against SQL in itself, but against the lack of tools. Do you remember Oracle and<br>how easy was in comparison to work with MongoDB? If something good was left by the NoSQL revolution, it is more attention to the quality of tools for developers, from code editors to debugging tools and database user interfaces.</p>
+<p>So, what about Typescript? It is not a magic wand, for sure. However, I believe that it can be useful in some contexts and when properly used. In addition, its type system has the flexibility and hackability of some dynamic languages. But hold on a minute and let me introduce some terminology.</p>
+<h1 id="A-little-type-theory"><a href="#A-little-type-theory" class="headerlink" title="A little type theory"></a>A little type theory</h1><p>Here is a quick recap based on Wikipedia.</p>
+<ul>
+<li><strong>Type checking</strong> is the process of verifying type constraints</li>
+<li><strong>Static type checking</strong> is type checking at compile time</li>
+<li><strong>Dynamic type checking</strong> is type checking at runtime</li>
+<li><strong>Strongly typed</strong> is an informal notion and means roughly “how much I am allowed to violate type constraints”. For example, if <code>x</code> is of type integer, it cannot be multiplied by <code>0.2</code> in a very strongly typed language because multiplication over floats is not allowed over integers.</li>
+<li><strong>Explicit</strong> means that every variable must be typed.</li>
+<li><strong>Implicit</strong> means that some types can be inferred by the compiler or interpreter.</li>
+<li><strong>Safety</strong> is a property that Milner expressed as “Well-typed programs cannot go wrong”. In other words, if we can assign a type to an expression, we are sure that that expression can be evaluated without surprises.</li>
+<li><strong>Inheritance</strong> is a <code>is-a</code> relation. Tom <code>is-a</code> cat, but Tom <code>is-a</code> an animal, too. There are at least two kinds of inheritance: structural and nominal. Nominal inheritance means that an item is labelled with its type: Tom <code>is-a</code> cat because I say it is a cat. Structural inheritance means that two items are the same if they share the same properties. Duck typing is a sort of structural inheritance. Here, we do not consider prototypical inheritance typical of Javascript.</li>
+</ul>
+<p>This is a table with some examples from some programming languages.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>type checking</th>
+<th>strong/weak</th>
+<th>typing</th>
+<th>safety</th>
+<th>inheritance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Typescript</td>
+<td>static/type guards</td>
+<td>strong, but…</td>
+<td>implicit</td>
+<td>no</td>
+<td>structural</td>
+</tr>
+<tr>
+<td>Java</td>
+<td>static/dynamic</td>
+<td>strong</td>
+<td>explicit</td>
+<td>yes</td>
+<td>nominal</td>
+</tr>
+<tr>
+<td>Ruby</td>
+<td>dynamic</td>
+<td>strong</td>
+<td>?</td>
+<td>NA</td>
+<td>duck</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>dynamic</td>
+<td>strong</td>
+<td>both (?)</td>
+<td>NA</td>
+<td>duck</td>
+</tr>
+<tr>
+<td>Javascript</td>
+<td>dynamic</td>
+<td>weak</td>
+<td>NA</td>
+<td>NA</td>
+<td>NA</td>
+</tr>
+</tbody></table>
+<p>Java has (had?) an explicit type system and is (was?) based on nominal inheritance.<br>This means that every variable must be typed and hierarchies of classes and interfaces tend to emerge.<br>In my opinion, for this reason Java type system is heavy and adds overhead.<br>When you change a type, you have to chase all the type errors in the hierarchy.<br>So you do not have to maintain your code base, but also your types.</p>
+<h1 id="Typescript-is-lightweight-if-used-wisely-imo"><a href="#Typescript-is-lightweight-if-used-wisely-imo" class="headerlink" title="Typescript is lightweight, if used wisely (imo)"></a>Typescript is lightweight, if used wisely (imo)</h1><p>Typescript is statically typed, but its type system is very different from Java’s. In my opinion, it is closer to Ruby than Java!</p>
+<ul>
+<li>Structural inheritance is similar to duck typing (but a property must exist at compile time).</li>
+<li>Typing is implicit and types can be inferred (but there is no run time check).</li>
+<li>Type guards and disjoint unions allow us to emulate dynamic typing at run time.</li>
+<li>Typescript intentionally sets a trade off between safety and developer productivity. So, it is ok to be unsafe.</li>
+</ul>
+<p>Typescript is implicit. You can assign a type to every variable like in the snippet below, if you enjoy it.<br>But you do not have to. Typescript is able to infer the correct types.</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="attr">x</span>: <span class="built_in">number</span> = <span class="number">2</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="attr">x</span>: <span class="title class_">User</span> = &#123; <span class="attr">name</span>: <span class="string">&#x27;Marco&#x27;</span> &#125;;</span><br></pre></td></tr></table></figure>
+<p>Typescript interfaces have structural inheritance (but there is a proposal also for nominal). The following snippet of code compiles.<br>Doesn’t it look like duck typing?</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">Dog</span>&#123;&#125;</span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Duck</span>&#123;&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">cook</span>(<span class="params">d: Duck</span>) &#123;&#125;</span><br><span class="line"><span class="keyword">const</span> <span class="attr">spot</span>: <span class="title class_">Dog</span> = &#123;&#125;</span><br><span class="line"><span class="title function_">cook</span>(spot)</span><br></pre></td></tr></table></figure>
+<p>In Typescript there are classes and interfaces, but you do not have to build hierarchies. Flat data models are always better.<br>In this way, you avoid premature and wrong abstractions</p>
+<p>Typescript is strong as Ruby and Java, but it is a different flavor of being strongly typed.<br>As a human being, you might know the run time type of an expression better than a dumb algorithm.<br>It might depend on contextual information you have, which is not inferable from code.<br>You can take advantage of your über-Turing powers to increase your productivity.<br>You can show that AI has not won the war against humans with syntactic constructs like</p>
+<ul>
+<li><code>!</code> (“hey compiler, I am sure this is not <code>null</code>”)</li>
+<li><code>as T</code> (“hey compiler, this is <code>T</code>”) (NB: it is not casting!)</li>
+</ul>
+<h1 id="Where-Typescript-is-useful"><a href="#Where-Typescript-is-useful" class="headerlink" title="Where Typescript is useful"></a>Where Typescript is useful</h1><p>If you build an SDK or library used by other applications, types are useful to define clear contracts between APIs and consumers.<br>In addition, during refactoring, types can help you understand the consequences of a change.</p>
+<p>Some types, common in functional programming languages, can help in everyday programming situations. For example,</p>
+<ul>
+<li><code>Option&lt;T&gt;</code> instead of <code>null</code> or <code>undefined</code> is better to describe a case when a function could return no value.</li>
+<li><code>Either&lt;T, U&gt;</code> can replace <code>try-catch</code> blocks, which are usually hard to debug.</li>
+<li><code>Task&lt;T&gt;</code> describes asynchronous computation and replaces <code>Promises</code>.</li>
+</ul>
+<p>For Typescript, <a target="_blank" rel="noopener" href="https://github.com/gcanti/fp-ts">fp-ts</a> is a very nice library that implements those types.</p>
+<p>The considerations above are generic and not specific to Typescript. Typescript has also a couple of nice features that are worth mentioning.</p>
+<p>Using <a target="_blank" rel="noopener" href="https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types">mapped types</a> it is possible to define complex type constraints.<br>For example, let us assume you want to implement a database of superheroes. Each hero has a list of super skills. For example,<br>Superman has <code>flying</code> and <code>superStrength</code>, Aquamen has <code>fishTalking</code> and Batman has nothing. You can define a generic interface <code>Hero</code> where the skill set depends on a generic that defines which kind of hero the interface represents. For example, if <code>bruce</code> is a <code>Batman</code> hero, then Typescript knows that he cannot fly!</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">Skills</span> &#123;</span><br><span class="line">   <span class="title class_">Batman</span>: &#123;&#125;;</span><br><span class="line">   <span class="title class_">Superman</span>: &#123;</span><br><span class="line">       <span class="attr">flying</span>: <span class="literal">true</span>;</span><br><span class="line">       <span class="attr">superStrength</span>: <span class="literal">true</span>;</span><br><span class="line">   &#125;;</span><br><span class="line">   <span class="title class_">Aquaman</span>:&#123;</span><br><span class="line">       <span class="attr">fishTalking</span>: <span class="literal">true</span>;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Hero</span>&lt;T <span class="keyword">extends</span> keyof <span class="title class_">Skills</span>&gt; &#123;</span><br><span class="line">   <span class="attr">skills</span>: <span class="title class_">Skills</span>[T];</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">const</span> <span class="attr">clark</span>: <span class="title class_">Hero</span>&lt;<span class="string">&#x27;Superman&#x27;</span>&gt; = ...;</span><br><span class="line"><span class="keyword">const</span> <span class="attr">bruce</span>: <span class="title class_">Hero</span>&lt;<span class="string">&#x27;Batman&#x27;</span>&gt; = ...;</span><br><span class="line"> </span><br><span class="line">clark.<span class="property">skills</span>.<span class="property">flying</span>; <span class="comment">// correct!</span></span><br><span class="line">bruce.<span class="property">skills</span>.<span class="property">flying</span>; <span class="comment">// type error!</span></span><br></pre></td></tr></table></figure>
+<p>You can use this trick to document your code. I think that it is impossible to express this kind of constraints in <code>jsDoc</code>.</p>
+<p>Type level operations are powerful in Typescript. Indeed, its type system is Turing complete. Look at <a target="_blank" rel="noopener" href="https://github.com/tycho01/typical">this project</a> for some very impressive examples.</p>
+<p>I do not think that our goal is to type as much as we can. Typescript offers us a great flexibility and expressivity. It is up to us to decide how much typing we need. In the superheroes example, we can decide to define <code>Hero.skills</code> as a simple object. In this case, the compiler cannot help us to understand when, by mistake, we try to make <code>bruce</code> fly. I am not sure that <code>bruce</code> would agree, but it is fine. It is up to us to understand from the context what is more important: safety or productivity.</p>
+<h1 id="When-Typescript"><a href="#When-Typescript" class="headerlink" title="When Typescript"></a>When Typescript</h1><p>Typescript lets us decide what, if and how to type. As a general rule, I would say that we need to type at least the boundaries.<br>The boundaries are the interfaces with the external world.</p>
+<p>If a function is designed to be consumed by 3rd parties, it is better to type its arguments and return value.</p>
+<p>If we use higher order components to compose functions, the units of composition and the combinators should be typed.<br>In this way, Typescript helps us to compose things in a meaningful way.</p>
+<p>Finally, we can use Typescript to follow a type-define-refine approach as proposed by <a target="_blank" rel="noopener" href="https://www.manning.com/books/type-driven-development-with-idris">Edwin Brady</a> for Idris.</p>
+<ul>
+<li>First, create a <strong>type</strong> describing what you want to achieve.</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="attr">getFirstCommand</span>: <span class="function">(<span class="params">input: Input</span>) =&gt;</span> <span class="title class_">Command</span> = &#123;&#125; <span class="keyword">as</span> <span class="built_in">any</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Then <strong>define</strong> a tentative implementation.</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="attr">getFirstCommand</span>: <span class="function">(<span class="params">input: Input</span>) =&gt;</span> <span class="title class_">Command</span> =</span><br><span class="line"> <span class="function"><span class="params">input</span> =&gt;</span> input.<span class="property">payload</span>.<span class="property">commands</span>[<span class="number">0</span>]; <span class="comment">// type error command can be undefined</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Finally, <strong>refine</strong> your implementation until type errors are resolved.</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="attr">getFirstCommand</span>: <span class="function">(<span class="params">input: Input</span>) =&gt;</span> <span class="title class_">Command</span> =</span><br><span class="line"> <span class="function"><span class="params">input</span> =&gt;</span> input.<span class="property">payload</span>.<span class="property">commands</span> ? input.<span class="property">payload</span>.<span class="property">commands</span>[<span class="number">0</span>] : [];</span><br></pre></td></tr></table></figure>
+<h1 id="Where-Typescript-is-bad"><a href="#Where-Typescript-is-bad" class="headerlink" title="Where Typescript is bad"></a>Where Typescript is bad</h1><p>Typescript is not the best programming language in the world. Other programming languages and different type systems could be more suitable in other contexts.</p>
+<p>There are several things of Typescript I do not like.</p>
+<p>For example, type errors look scary. In theory, Typescript team is working on a better notation. However, at the moment,<br>error messages are quite long. Despite of that, they are very informative. If you read them carefully, you should be able to fix them easily.</p>
+<p>Type level operations can be complicated and hacky. In real life, though, you can learn just the most common tricks, like mapped types.<br>Even if it is interesting theoretically, you don’t really need to implement <a target="_blank" rel="noopener" href="https://github.com/Microsoft/TypeScript/issues/14833">Turing machines</a> with Typescript types in your daily programming job.</p>
+<p>Finally, Typescript is Javascript. You must know Javascript (and its oddities) to understand Typescript.</p>
+<h1 id="Conclusions"><a href="#Conclusions" class="headerlink" title="Conclusions"></a>Conclusions</h1><ul>
+<li>Types do not have thaumaturgical qualities, they are just a tool.</li>
+<li>There aren’t typeless and typeful languages, but many type systems.</li>
+<li>Imo Typescript type system is lightweight, flexible and hackable.</li>
+<li>Typescript has some useful features that help us in everyday programming.</li>
+<li>We should not type as much as we can. It is more important to type the boundaries.</li>
+<li>Typescript is not perfect.</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Types-are-just-a-tool"><span class="toc-number">1.</span> <span class="toc-text">Types are just a tool</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#To-type-or-not-to-type-that%E2%80%99s-the-wrong-question"><span class="toc-number">2.</span> <span class="toc-text">To type or not to type: that’s the (wrong) question</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#A-little-type-theory"><span class="toc-number">3.</span> <span class="toc-text">A little type theory</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Typescript-is-lightweight-if-used-wisely-imo"><span class="toc-number">4.</span> <span class="toc-text">Typescript is lightweight, if used wisely (imo)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Where-Typescript-is-useful"><span class="toc-number">5.</span> <span class="toc-text">Where Typescript is useful</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#When-Typescript"><span class="toc-number">6.</span> <span class="toc-text">When Typescript</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Where-Typescript-is-bad"><span class="toc-number">7.</span> <span class="toc-text">Where Typescript is bad</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Conclusions"><span class="toc-number">8.</span> <span class="toc-text">Conclusions</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&text=Typescript for typeless people"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&title=Typescript for typeless people"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&is_video=false&description=Typescript for typeless people"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Typescript for typeless people&body=Check out this article: https://mstn.github.io/2019/07/27/typescript-for-typeless-people/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&title=Typescript for typeless people"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&title=Typescript for typeless people"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&title=Typescript for typeless people"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&title=Typescript for typeless people"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&name=Typescript for typeless people&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2019/07/27/typescript-for-typeless-people/&t=Typescript for typeless people"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    mstn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+ 
+  <link
+    rel="preload"
+    href="/lib/font-awesome/css/all.min.css"
+    as="style"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript
+    ><link
+      rel="stylesheet"
+      href="/lib/font-awesome/css/all.min.css"
+  /></noscript>
+
+
+    <!-- jquery -->
+
+  
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+
+
+
+<!-- clipboard -->
+
+  
+    
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
