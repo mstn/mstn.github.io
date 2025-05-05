@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="In this post, I want to show how hypergraphs are a good intermediate representation for surfacing parallelism in imperative programs. Hypergraphs are a sort of intermediate representation for string d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hypergraphs as an Intermediate Representation">
+<meta property="og:url" content="https://mstn.github.io/2025/05/05/hypergraphs-as-ir/index.html">
+<meta property="og:site_name" content="mstn&#39;s blog">
+<meta property="og:description" content="In this post, I want to show how hypergraphs are a good intermediate representation for surfacing parallelism in imperative programs. Hypergraphs are a sort of intermediate representation for string d">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://mstn.github.io/images/hypergraphs/convolution.png">
+<meta property="og:image" content="https://mstn.github.io/images/hypergraphs/compose.png">
+<meta property="og:image" content="https://mstn.github.io/images/hypergraphs/hyper.png">
+<meta property="og:image" content="https://mstn.github.io/images/hypergraphs/x10000.png">
+<meta property="og:image" content="https://mstn.github.io/images/hypergraphs/seq_x_y.png">
+<meta property="og:image" content="https://mstn.github.io/images/hypergraphs/seq_x_y_graph.png">
+<meta property="og:image" content="https://mstn.github.io/images/hypergraphs/parallel_diagram.png">
+<meta property="og:image" content="https://mstn.github.io/images/hypergraphs/parallel_graph.png">
+<meta property="article:published_time" content="2025-05-05T07:00:00.000Z">
+<meta property="article:modified_time" content="2025-05-05T16:33:29.923Z">
+<meta property="article:author" content="mstn">
+<meta property="article:tag" content="applied category theory">
+<meta property="article:tag" content="compilers">
+<meta property="article:tag" content="ir">
+<meta property="article:tag" content="optimizations">
+<meta property="article:tag" content="tape diagrams">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mstn.github.io/images/hypergraphs/convolution.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Hypergraphs as an Intermediate Representation</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="mstn&#39;s blog" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2025/04/26/surfacing-parallelism/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&text=Hypergraphs as an Intermediate Representation"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&title=Hypergraphs as an Intermediate Representation"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&is_video=false&description=Hypergraphs as an Intermediate Representation"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Hypergraphs as an Intermediate Representation&body=Check out this article: https://mstn.github.io/2025/05/05/hypergraphs-as-ir/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&title=Hypergraphs as an Intermediate Representation"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&title=Hypergraphs as an Intermediate Representation"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&title=Hypergraphs as an Intermediate Representation"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&title=Hypergraphs as an Intermediate Representation"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&name=Hypergraphs as an Intermediate Representation&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&t=Hypergraphs as an Intermediate Representation"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Revisiting-tape-diagrams"><span class="toc-number">1.</span> <span class="toc-text">Revisiting tape diagrams</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Surfacing-paralellelism-hypergraph-version"><span class="toc-number">2.</span> <span class="toc-text">Surfacing paralellelism, hypergraph version</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">3.</span> <span class="toc-text">References</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Hypergraphs as an Intermediate Representation
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">mstn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-05-05T07:00:00.000Z" class="dt-published" itemprop="datePublished">2025-05-05</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/applied-category-theory/" rel="tag">applied category theory</a>, <a class="p-category" href="/tags/compilers/" rel="tag">compilers</a>, <a class="p-category" href="/tags/ir/" rel="tag">ir</a>, <a class="p-category" href="/tags/optimizations/" rel="tag">optimizations</a>, <a class="p-category" href="/tags/tape-diagrams/" rel="tag">tape diagrams</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>In this post, I want to show how hypergraphs are a good intermediate representation for surfacing parallelism in imperative programs. Hypergraphs are a sort of intermediate representation for string diagrams [1] and they have been used as an intermediate representation for programming languages at least in [7], so we are not saying anything new here. My goal is to make this knowledge more accessible to compiler engineers since I think that their field could draw some concrete practical benefits from recent developments in Category Theory. I believe that the essence of modern IRs such as MLIR [8] and RVSDG [9] can be mathematically modeled by some sort of bimonoidal category as in tape diagrams [5] or mixed algebras [10]. More specifically, the data structure for exposing parallelism from [9] recalls what we do here with hypergraphs, motivated by an example we found in an old category theory book [10]. I think it is always interesting when theory and practice converge! </p>
+<p>Let’s consider a simple code in Python:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x = 1</span><br><span class="line">y = 3</span><br><span class="line">z = y + 2</span><br></pre></td></tr></table></figure>
+
+<p>Intuitively, we observe that the order of execution of some statements is not relevant. More specifically, as far as <code>y</code> is assigned before <code>z</code>, every other reordering does not change what the program does. For instance, another equivalent program is given by:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">y = <span class="number">3</span></span><br><span class="line">z = y + <span class="number">2</span></span><br><span class="line">x = <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>How can we represent a program in such a way that equivalent programs have the same representation? If we use an <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">abstract syntax tree</a> (AST) as an internal representation, equivalent programs would have different representations. An AST is a data structure that represents the syntax of a program. Think of syntax as the rules and structures that define how we can form well-formed programs in a language. An internal representation based on ASTs would follow how terms are laid out so that equivalent programs that are syntantically different would have different representations.</p>
+<p>For this reason (but not only), compilers do not use the AST as an intermediate representation. For example, in MLIR [8], code blocks are represented in <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Static_single-assignment_form">Single Static Assignement</a> form where each variable is assigned exactly once and the order of assignments is not relevant because it is implicit and induced by the data dependencies between definitions and uses. In other words, syntatically different blocks have the same meaning if one can be written as the other just reordering assignments.</p>
+<p>Something similar has been studied in applied Category Theory (e.g. [1]). <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/String_diagram">String diagrams</a> are a sort of AST on steroids: they are not trees, but, just like commands and expressions in programming languages, they are a formal graphical syntax that allows us to construct diagrams by inductively applying some basic compositional rules. If you are interested in more details, we refer to [6] for a gentle introduction where a detailed explanation is provided. As for ASTs, the structure of the diagram reflects the structure of how basic building blocks are composed. However, two string diagrams are considered equivalent if we can apply topological deformations of the wires that preserve the connections. This “rewriting” of diagrams based on these implicit equations is a form of syntactic manipulation. In [1] (and subsequent papers [2] and [3]), the authors show how hypergraphs are a data structure for string diagrams that makes these rewriting rules implicit. In other words, equivalent (up to some rewrite rules) string diagrams have the same representation as hypergraphs.</p>
+<p>In a <a href="https://mstn.github.io/2025/04/26/surfacing-parallelism/">previous blog post</a>, we talked about a categorical semantics for computer programs borrowed from [5]. In that case, we built a string diagram (or more precisely a string diagram of string diagrams) as an intermediate representation.<br>Can we design a better intermediate representation for programs where “equivalent” programs are represented in the same way? In other terms, can we represent a sequential program with a data structure that is the same data structure corresponding to its parallel version? The answer is positive and, surprise, surprise, we are going to use hypegraphs of hypergraphs as a representation for string diagrams of string diagrams. The benefit of using hypergraphs as an intermediate representation is that we don’t have to apply rewrite rules as we did in <a href="https://mstn.github.io/2025/04/26/surfacing-parallelism/">here</a> for surfacing parallelism, but parallelism is implicit in the hypegraph data structure. In other terms, to paraphrase [7], the hypergraph intermediate representation <em>absorbes</em> the “parallism” laws.</p>
+<h1 id="Revisiting-tape-diagrams"><a href="#Revisiting-tape-diagrams" class="headerlink" title="Revisiting tape diagrams"></a>Revisiting tape diagrams</h1><p>In this section, we introduce a categorical semantics for IMP. We follow the approach based on tape diagrams described in [5]. However, we are changing it a little. More specifically, we build contexts dynamically and we consider only a particular case of tapes that allow us to simplify the explanation.</p>
+<p>As we discussed elsewhere, in the context of programming languages, tape diagrams capture the idea of alternative computations. We use them to model <code>if-then-else</code> constructs. However, in <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Structured_programming">structured programs</a>, alternative control cannot go, so to speak, wild. Usually (I am over-simplifying a bit since I don’t consider <code>break</code> and <code>continue</code>), <code>if-then-else</code> blocks have a single entry point and a single exit point. This is not the case when we have arbitrary <code>goto</code> statements. In [5], this is captured by the concept of convolution. Convolution is a control diagram with single entry and exit points. Hence, we can represent convolutions as control diagrams nested in a data diagram, as illustrated in the following picture.</p>
+<p><img src="/images/hypergraphs/convolution.png"></p>
+<p>The benefit is that we can compose convolutions with data diagrams without the need of introducing $\otimes$ (aka green tapes in my previous post). We can do that because convolution tells us how we can split and merge control. So, we are restricting a lot the possible control flows and programs that can be represented. However, this is fine as far as we consider only structured languages.</p>
+<p>The other change we are going to introduce is how typing contexts are built. In [5], expressions and commands are encoded into string diagrams by induction on the structure of well-typed terms. In other words, terms are well-typed with respect to a <em>given fixed</em> context. We are instead interested in building contexts in a more dynamic way. The reason is that we want to compute the <em>minimal</em> context for subterms because otherwise hypergraphs wouldn’t absorb parallelism. If it is not clear what I mean, I hope it will become so once more concrete examples are provided.</p>
+<p>A program can be seen as a morphism $[y_j = t_j]_j$ from context $\Gamma = {x_i: T_i}_i$ to context $\Delta = {y_j: U_j}_j$ where $y_j: T_j \in \Delta$ and $\Gamma \vdash t_j: T_j$, as usual. Intuitively, $\Gamma$ is the input context that provides typing for free variables occurring in $t_j$, while $\Delta$ is the new context resulting from the execution of a program. In our setting, $\Delta$ usually extends $\Gamma$ with new variable definitions.</p>
+<p>We need to pay attention when we define sequential composition of commands $C;D$ because it does not correspond to composition of context morphisms. For simplicity’s sake, we assume that contexts can always be merged over common names; in reality we should be concerned about type unification. This is the derivation for the context morphism of $C;D$.</p>
+<p>$$<br>\frac{\Gamma \vdash C: \Gamma’ \quad \Delta \vdash D: \Delta’}<br>      {\Gamma, \Delta \setminus \Gamma’ \vdash C; D: \Gamma’ \setminus \Delta’, \Delta’}<br>$$</p>
+<p>Roughly, we need to propagate the inner contexts $\Gamma’$ and $\Delta$, and we should remove from $\Gamma’$ the variables that are redefined in $\Delta’$. Graphically, sequential composition is defined in the following way that might recall some parallel operators in process algebras with synchronization over a set of names.</p>
+<p><img src="/images/hypergraphs/compose.png"></p>
+<p>Note that we have omitted saying several things in order to keep it simple. First of all, wires are not contexts but types: we label wires with variable names just for clarity. In addition, we should swap wires because the order of wires matters.</p>
+<h1 id="Surfacing-paralellelism-hypergraph-version"><a href="#Surfacing-paralellelism-hypergraph-version" class="headerlink" title="Surfacing paralellelism, hypergraph version"></a>Surfacing paralellelism, hypergraph version</h1><p>An hypergraph is a bipartite graph with two kinds of nodes: vertices and hyperedges. Intuitively, a hyperedge is an edge that connects more than two vertices. String diagrams can be represented as hypergraphs where wires are vertices and ground morphisms hyperedges. In the following picture, we show a string diagram (left) and its hypergraph (centre) for the morphism $(f \otimes id_U) ; (id_V \otimes g)$. Dotted boxes are not part of the string diagram; they represent the syntactic layout. The point here is that in a hypergraph only the connections between vertices and hyperedges matter and not their topological disposition. Hence, the hypergraph in the centre can be visualized as the hypergraph on the right.</p>
+<p><img src="/images/hypergraphs/hyper.png"></p>
+<p>Let’s consider the code fragment from our  previous <a href="https://mstn.github.io/2025/04/26/surfacing-parallelism/">post</a> and look how what we have learned so far can help us surfacing parallelism:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">x = <span class="number">10000</span></span><br><span class="line">y = <span class="number">10000</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> x &gt; <span class="number">0</span>:</span><br><span class="line">    x = x - <span class="number">1</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    x = x + <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> y &gt; <span class="number">0</span>:</span><br><span class="line">    y = y - <span class="number">1</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    y = y + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">x = x + y</span><br></pre></td></tr></table></figure>
+
+<p>First, we build a diagram for <code>x=10000</code>. The initial context $\Gamma$ is the empty set so we don’t have any input wire; instead, after the excution, a new context $\Gamma’$ with an element $x: \mathit{Nat}$ is created.</p>
+<p><img src="/images/hypergraphs/x10000.png"></p>
+<p>The diagram for <code>y=10000</code> is built in a similar way. We want now to compose the two instructions in <code>x=10000; y=10000</code>. We need to use the operator <code>sequence</code> described in the previous section whose output is illustrated in the following picture.</p>
+<p><img src="/images/hypergraphs/seq_x_y.png"></p>
+<p>The diagram on the right is a <em>string diagram</em>, namely a syntactic object. If we encode the string diagram as a hypergraph, the visualization is simplified. In particular, since the two assignments are data-independent, they will be justaposed (meaning that they can be executed in parallel) as shown below on the very right.</p>
+<p><img src="/images/hypergraphs/seq_x_y_graph.png"></p>
+<p>We can continue in a similar way to build the string diagram for the whole program. Note that we apply again the sequence composition when we meet the two <code>if-then-else</code> blocks. In this case, <code>y</code> (respectively <code>x</code>) if not used in the first (respectively second) block, so the block is in parallel with a wire, i.e. do nothing on <code>y</code> (respectively <code>x</code>).</p>
+<img src="/images/hypergraphs/parallel_diagram.png" width="70%" height="50%">
+
+<p>If we represent the string diagram above as an hypergraph, the inherent parallelism is exposed as illustrated here:</p>
+<p><img src="/images/hypergraphs/parallel_graph.png"></p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p>[1] Bonchi, Filippo, et al. “String diagram rewrite theory I: rewriting with Frobenius structure.” Journal of the ACM (JACM) 69.2 (2022): 1-58. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2012.01847">pdf</a></p>
+<p>[2] Bonchi, Filippo, et al. “String diagram rewrite theory II: Rewriting with symmetric monoidal structure.” Mathematical Structures in Computer Science 32.4 (2022): 511-541. <a target="_blank" rel="noopener" href="https://www.cambridge.org/core/services/aop-cambridge-core/content/view/26B31C77D5ABFE8370B2A4C4589547B4/S0960129522000317a.pdf/string_diagram_rewrite_theory_ii_rewriting_with_symmetric_monoidal_structure.pdf">pdf</a></p>
+<p>[3] Bonchi, Filippo, et al. “String diagram rewrite theory III: Confluence with and without Frobenius.” Mathematical Structures in Computer Science 32.7 (2022): 829-869. <a target="_blank" rel="noopener" href="https://www.cambridge.org/core/services/aop-cambridge-core/content/view/F6E1207A100A9F1CFB48FFBAEC785F61/S0960129522000123a.pdf/div-class-title-string-diagram-rewrite-theory-iii-confluence-with-and-without-frobenius-div.pdf">pdf</a></p>
+<p>[4] Wilson, Paul, and Fabio Zanasi. “Data-parallel algorithms for string diagrams.” arXiv preprint arXiv:2305.01041 (2023). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2305.01041">pdf</a></p>
+<p>[5] Bonchi, Filippo, Alessandro Di Giorgio, and Elena Di Lavore. “A Diagrammatic Algebra for Program Logics.” arXiv preprint arXiv:2410.03561 (2024). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2410.03561">pdf</a></p>
+<p>[6] Piedeleu, Robin, and Fabio Zanasi. “An introduction to string diagrams for computer scientists.” arXiv preprint arXiv:2305.08768 (2023). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2305.08768">pdf</a></p>
+<p>[7] Wilson, Paul. “CATGRAD: A Categorical Compiler for Deep Learning.” <a target="_blank" rel="noopener" href="https://oxford24.github.io/assets/act-papers/65__textsc_catgrad_a_categorical_.pdf">pdf</a></p>
+<p>[8] Lattner, Chris, et al. “MLIR: A compiler infrastructure for the end of Moore’s law.” arXiv preprint arXiv:2002.11054 (2020). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2002.11054">pdf</a></p>
+<p>[9] Reissmann, Nico, et al. “RVSDG: An intermediate representation for optimizing compilers.” ACM Transactions on Embedded Computing Systems (TECS) 19.6 (2020): 1-28. <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1912.05036">pdf</a></p>
+<p>[10] Stefanescu, Gheorghe. Network algebra. Springer Science &amp; Business Media, 2000.</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Revisiting-tape-diagrams"><span class="toc-number">1.</span> <span class="toc-text">Revisiting tape diagrams</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Surfacing-paralellelism-hypergraph-version"><span class="toc-number">2.</span> <span class="toc-text">Surfacing paralellelism, hypergraph version</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">3.</span> <span class="toc-text">References</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&text=Hypergraphs as an Intermediate Representation"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&title=Hypergraphs as an Intermediate Representation"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&is_video=false&description=Hypergraphs as an Intermediate Representation"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Hypergraphs as an Intermediate Representation&body=Check out this article: https://mstn.github.io/2025/05/05/hypergraphs-as-ir/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&title=Hypergraphs as an Intermediate Representation"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&title=Hypergraphs as an Intermediate Representation"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&title=Hypergraphs as an Intermediate Representation"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&title=Hypergraphs as an Intermediate Representation"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&name=Hypergraphs as an Intermediate Representation&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2025/05/05/hypergraphs-as-ir/&t=Hypergraphs as an Intermediate Representation"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    mstn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+ 
+  <link
+    rel="preload"
+    href="/lib/font-awesome/css/all.min.css"
+    as="style"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript
+    ><link
+      rel="stylesheet"
+      href="/lib/font-awesome/css/all.min.css"
+  /></noscript>
+
+
+    <!-- jquery -->
+
+  
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+
+
+
+<!-- clipboard -->
+
+  
+    
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
