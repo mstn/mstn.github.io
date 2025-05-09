@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="The archetypal beginner example used to explain the GPU architecture shows how loop iterations can be executed in parallel by multiple threads. For instance, consider this snippet, taken and slightly">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GPU programming with category theory">
+<meta property="og:url" content="https://mstn.github.io/2025/05/09/category-theory-gpu/index.html">
+<meta property="og:site_name" content="mstn&#39;s blog">
+<meta property="og:description" content="The archetypal beginner example used to explain the GPU architecture shows how loop iterations can be executed in parallel by multiple threads. For instance, consider this snippet, taken and slightly">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://mstn.github.io/images/category-theory-gpu/arrays.png">
+<meta property="og:image" content="https://mstn.github.io/images/category-theory-gpu/read.png">
+<meta property="og:image" content="https://mstn.github.io/images/category-theory-gpu/write.png">
+<meta property="og:image" content="https://mstn.github.io/images/category-theory-gpu/code.png">
+<meta property="og:image" content="https://mstn.github.io/images/category-theory-gpu/unfold.png">
+<meta property="og:image" content="https://mstn.github.io/images/category-theory-gpu/simplify.png">
+<meta property="og:image" content="https://mstn.github.io/images/category-theory-gpu/conv-simplify.png">
+<meta property="og:image" content="https://mstn.github.io/images/category-theory-gpu/tape-simplify.png">
+<meta property="og:image" content="https://mstn.github.io/images/category-theory-gpu/increment-simplify.png">
+<meta property="og:image" content="https://mstn.github.io/images/category-theory-gpu/derivation.png">
+<meta property="article:published_time" content="2025-05-09T07:00:00.000Z">
+<meta property="article:modified_time" content="2025-05-09T19:35:39.628Z">
+<meta property="article:author" content="mstn">
+<meta property="article:tag" content="applied category theory">
+<meta property="article:tag" content="compilers">
+<meta property="article:tag" content="gpu">
+<meta property="article:tag" content="optimizations">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mstn.github.io/images/category-theory-gpu/arrays.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>GPU programming with category theory</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="mstn&#39;s blog" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2025/05/05/hypergraphs-as-ir/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2025/05/09/category-theory-gpu/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&text=GPU programming with category theory"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&title=GPU programming with category theory"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&is_video=false&description=GPU programming with category theory"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=GPU programming with category theory&body=Check out this article: https://mstn.github.io/2025/05/09/category-theory-gpu/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&title=GPU programming with category theory"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&title=GPU programming with category theory"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&title=GPU programming with category theory"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&title=GPU programming with category theory"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&name=GPU programming with category theory&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2025/05/09/category-theory-gpu/&t=GPU programming with category theory"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Representing-arrays-in-data-diagrams"><span class="toc-number">1.</span> <span class="toc-text">Representing arrays in data diagrams</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Generating-parallel-code"><span class="toc-number">2.</span> <span class="toc-text">Generating parallel code</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Final-notes-and-a-disclaimer"><span class="toc-number">3.</span> <span class="toc-text">Final notes and a disclaimer</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">4.</span> <span class="toc-text">References</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        GPU programming with category theory
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">mstn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-05-09T07:00:00.000Z" class="dt-published" itemprop="datePublished">2025-05-09</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/applied-category-theory/" rel="tag">applied category theory</a>, <a class="p-category" href="/tags/compilers/" rel="tag">compilers</a>, <a class="p-category" href="/tags/gpu/" rel="tag">gpu</a>, <a class="p-category" href="/tags/optimizations/" rel="tag">optimizations</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>The archetypal beginner example used to explain the GPU architecture shows how loop iterations can be executed in parallel by multiple threads. For instance, consider this snippet, taken and slightly adapted from [2]:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="number">1.</span>.N:</span><br><span class="line">    a[i] = <span class="number">2</span> * a[i]</span><br></pre></td></tr></table></figure>
+
+<p>Intuitively, each iteration is independent of the others. This is why it is possible to run them across different threads. In CUDA, the loop is replaced with a “kernel”, i.e. a function that runs in a single thread, as illustrated in this piece of code:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">my_kernel</span><span class="params">(<span class="type">int</span> *a)</span>&#123;</span><br><span class="line">    <span class="type">int</span> i = threadIdx.x; <span class="comment">// think of it as a sort of thread identifier</span></span><br><span class="line">    a[i] = <span class="number">2</span> * a[i];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>In a couple of posts inspired by [4] (<a href="/2025/04/26/surfacing-parallelism/">here</a> and <a href="/2025/05/05/hypergraphs-as-ir/">here</a>), I informally described how category theory can be used to expose parallelism in computer programs. So, I was curious to know if we can use the same gadgetry introduced there to parallelize the code above, automatically. In the rest of this post I want to study this problem and sketch a solution. You don’t need any knowledge of the GPU architecture to follow my ramblings. However, if you are interested, you can find an introduction in [1].</p>
+<p>There is another work where Category Theory is applied to GPU computing. In [3], the authors present a data structure for hypergraphs that can be efficiently implemented on parallel hardware such as GPUs. If I understand correctly, what they do is different from our present goal. To put it simply, they use GPU-optimized hypergraphs that runs efficiently on GPUs. However, our goal is different: we want to build a compiler that also uses hypergraphs as an intermediate representation, but the final product is GPU-optimized code, not necessarily the compiler itself.</p>
+<h1 id="Representing-arrays-in-data-diagrams"><a href="#Representing-arrays-in-data-diagrams" class="headerlink" title="Representing arrays in data diagrams"></a>Representing arrays in data diagrams</h1><p>First of all, we need to represent arrays in string diagrams. We follow [4] where programs are modelled as a data structure consisting of two layers, circuits and tapes, that represent data and control in programs, respectively. For simplicity’s sake, we consider only structured programming languages where control flows are restricted to a particular subclass, see <a href="/2025/05/05/hypergraphs-as-ir/">our previous post</a> for details.</p>
+<p>A data diagram is a string diagrams where wires are data and boxes operations on data. More specifically, wires represent tuple of types. Hence, it is natural to look at arrays as bundles of wires of the same type as illustrated below for the command <code>a[2] = a[2] + 1</code>.</p>
+<p><img src="/images/category-theory-gpu/arrays.png"></p>
+<p>The main challenge is to describe how array elements can be accessed dynamically, that is, when the index is not a number but another variable, e.g. <code>a[i]</code>. Let’s suppose that <code>a</code> is an array of elements of type <code>T</code> and <code>i</code> is an index, then we define the expression <code>a[i]</code> (i.e. read an array element) as follows:</p>
+<p><img src="/images/category-theory-gpu/read.png"></p>
+<p>Intuitively, each red box represents alternative control flows dependent on the value of <code>i</code>. At most one condition <code>i=n</code> in each box can be evaluated to <code>True</code> for a given value of <code>i</code>; so at most one red box is different from the empty relation. If the index is out of bound, the diagram is the empty diagram.</p>
+<p>We can write it also as a formula $a_i = \sum_{n \in N} c(i=n); \mathit{proj}_n$ where $c$ is the condition diagram and $\mathit{proj}_n$ discards all the wires but the $n$-th one.</p>
+<p>Now we have to define a diagram for assignments <code>a[i] = e</code>. We use the same trick: the element of the array that is written is condionally picked up using alternative control flows in such a way that at most red box is non empty for a given value of <code>i</code>.</p>
+<p><img src="/images/category-theory-gpu/write.png"></p>
+<p>The formula is a bit more complex in this case, but it should be pretty intuitive. Note that we simplified it a bit assuming that we have only one array always on the left. In this blog post we don’t consider the general case.</p>
+<p>$$<br>\sum_{n \in N} c(i=n); \blacktriangleleft_{1 \ldots n-1} \otimes \mathit{id}<br> \otimes \blacktriangleleft_{n+1 \ldots N};id_{1 \ldots n-1} \otimes \mathcal{E}(\Gamma \vdash e) \otimes  \mathit{id}_{n+1 \ldots N}<br>$$</p>
+<h1 id="Generating-parallel-code"><a href="#Generating-parallel-code" class="headerlink" title="Generating parallel code"></a>Generating parallel code</h1><p>First, we rewrite the program above with a syntax closer to the one in [4]: a <code>for</code> is just syntatic sugar for a <code>while</code>, as it is well known.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">i = <span class="number">1</span></span><br><span class="line"><span class="keyword">while</span> i&lt;=N:</span><br><span class="line">    a[i] = <span class="number">2</span> * a[i]</span><br><span class="line">    i = i + <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>The diagram is the following one. The blue box is a Kleene operator (see [4], basically it is a transitive closure).</p>
+<p><img src="/images/category-theory-gpu/code.png"></p>
+<p>In order to simplify the diagram, we unfold the Kleene/While operator. As it is common in the literature, <code>while c do d</code> can be defined recursively as <code>if c then (d; while c do d) else skip</code>. This is the basic idea behind unfolding. In the following picture, we show a single-step unfold corresponding to the first iteration of the loop. </p>
+<p><img src="/images/category-theory-gpu/unfold.png"></p>
+<p>Now, we can simplify the diagrams applying some rewrite rules. Let’s consider the first part of the unfolded diagram $\mathcal{E}(\Gamma \vdash i\mathit{:=}1;c(i&lt;N))$. Graphically, it is represented in the picture (1) below.</p>
+<p><img src="/images/category-theory-gpu/simplify.png"></p>
+<p>Since an expression is a function and not a predicate, we apply the duplicate rule (2). Because $\mathcal{E}(\Gamma \vdash e);\mathcal{E}(x \vdash P(x)) = \mathcal{E}(\Gamma \vdash P(x)[e/x])$ for Lemma 11.4 in [4], we can simplify the diagram as in (3) and obtain $\mathcal{E}(\Gamma \vdash i\leq N[1/i]) = \mathcal{E}(\Gamma \vdash \mathit{True})$; so, the right branch is always true and it can be pruned. We want to observe that these rewrite rules resemble <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Constant_folding">constant propagation</a>, a well-known optimization technique in compilers. This is not a coincidence, we will show in subsequent posts how other compiler optimizations can be described in terms of rewrites on hypegraphs.</p>
+<p>In a similar way, we can propagate expressions into convolutions because of their properties and the fact that expressions are functional. Then for each red box we can apply the simplification above.</p>
+<p><img src="/images/category-theory-gpu/conv-simplify.png"></p>
+<p>Now, we can simplify the conditions <code>i=n</code> in each red box as we did previously. However, at this time, at most one red box is a non empty relation. So we end up with a sum where at most one term is non zero. Hence, we can simplify the diagram removing the convolution as illustrated below.</p>
+<p><img src="/images/category-theory-gpu/tape-simplify.png"></p>
+<p>Now, we can expand <code>a[i]</code> applying the definition given in the previous section. The expansion reveals another convolution; we can remove the new convolution as we have just done above; drawing the steps is left as an exercise. Finally, we want simplify the node that increments <code>i</code>. This is similar to the simplification for predicates, but this time we use the analogous Lemma 11.3 in [4].</p>
+<p><img src="/images/category-theory-gpu/increment-simplify.png"></p>
+<p>We repeat the same steps for the other iterations until we don’t have anything else to unfold, i.e. at some point $i&lt;=N$ will be false making the “continuation” empty. Here, we summarize the steps.</p>
+<p><img src="/images/category-theory-gpu/derivation.png"></p>
+<p>Eventually, we get a diagram where we apply “in parallel” <code>*2</code> to each element of the array. This is what we wanted to obtain. The procedure generates an artifact <code>3</code> corresponding to the last value of <code>i</code>; since this artifact is not used elsewhere, it can be trashed.</p>
+<h1 id="Final-notes-and-a-disclaimer"><a href="#Final-notes-and-a-disclaimer" class="headerlink" title="Final notes and a disclaimer"></a>Final notes and a disclaimer</h1><p>Despite the example is pretty simple, I think it is cool. For example, if iterations are data dependent, the parallelization wouldn’t be possible and the graphical language would catch it. What I find also fun is that GPU threads are <em>actually</em> wires in our graphical formalism: so we have preserved also the metaphors!</p>
+<p>The examples provided here primarily cover a happy path, and a more formal treatment would require significantly more attention to detail and edge cases. The posts I write here are essentially an attempt at “learning in public.” Think of them as sharing unreviewed notes, the kind that would typically reside privately in a paper notebook. My reasons for doing so are twofold: to gather feedback and to connect with like-minded individuals. I am not yet certain about their correctness and would greatly appreciate any feedback you might have.</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p>[1] ENCCS, GPU Programming, accessed May 2025 <a target="_blank" rel="noopener" href="https://enccs.github.io/gpu-programming/">online</a></p>
+<p>[2] Paul Richmond, Introduction to GPU Programming, ICCS 2023 <a target="_blank" rel="noopener" href="https://youtu.be/OWP_0l5DehU?t=3276">YouTube</a></p>
+<p>[3] Wilson, Paul, and Fabio Zanasi. “Data-parallel algorithms for string diagrams.” arXiv preprint arXiv:2305.01041 (2023). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2305.01041">pdf</a></p>
+<p>[4] Bonchi, Filippo, Alessandro Di Giorgio, and Elena Di Lavore. “A Diagrammatic Algebra for Program Logics.” arXiv preprint arXiv:2410.03561 (2024). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2410.03561">pdf</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Representing-arrays-in-data-diagrams"><span class="toc-number">1.</span> <span class="toc-text">Representing arrays in data diagrams</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Generating-parallel-code"><span class="toc-number">2.</span> <span class="toc-text">Generating parallel code</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Final-notes-and-a-disclaimer"><span class="toc-number">3.</span> <span class="toc-text">Final notes and a disclaimer</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">4.</span> <span class="toc-text">References</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2025/05/09/category-theory-gpu/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&text=GPU programming with category theory"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&title=GPU programming with category theory"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&is_video=false&description=GPU programming with category theory"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=GPU programming with category theory&body=Check out this article: https://mstn.github.io/2025/05/09/category-theory-gpu/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&title=GPU programming with category theory"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&title=GPU programming with category theory"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&title=GPU programming with category theory"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&title=GPU programming with category theory"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2025/05/09/category-theory-gpu/&name=GPU programming with category theory&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2025/05/09/category-theory-gpu/&t=GPU programming with category theory"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    mstn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+ 
+  <link
+    rel="preload"
+    href="/lib/font-awesome/css/all.min.css"
+    as="style"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript
+    ><link
+      rel="stylesheet"
+      href="/lib/font-awesome/css/all.min.css"
+  /></noscript>
+
+
+    <!-- jquery -->
+
+  
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+
+
+
+<!-- clipboard -->
+
+  
+    
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
