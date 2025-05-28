@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Workflow engines like Temporal and Azure Durable Functions have emerged in recent years to simplify the complexity of building robust, long-running, and stateful applications in distributed environmen">
+<meta property="og:type" content="article">
+<meta property="og:title" content="A Workflow Engine">
+<meta property="og:url" content="https://mstn.github.io/2025/05/28/workflow-engine/index.html">
+<meta property="og:site_name" content="mstn&#39;s blog">
+<meta property="og:description" content="Workflow engines like Temporal and Azure Durable Functions have emerged in recent years to simplify the complexity of building robust, long-running, and stateful applications in distributed environmen">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/workflow-engine.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/workflow-vs-tape.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/example-triple.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/trace.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/queue.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/initial-state.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/final-state.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/activity-scheduled.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/activity-started.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/activity-completed.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/tape-queue.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/parallel-workflow.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/parallel-activity-scheduled.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/fork.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/join.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/merge.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/final-merge.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/simple-step.png">
+<meta property="og:image" content="https://mstn.github.io/images/workflow/compose-schedule.png">
+<meta property="article:published_time" content="2025-05-28T07:00:00.000Z">
+<meta property="article:modified_time" content="2025-05-28T20:45:46.880Z">
+<meta property="article:author" content="mstn">
+<meta property="article:tag" content="applied category theory">
+<meta property="article:tag" content="azure durable functions">
+<meta property="article:tag" content="temporal">
+<meta property="article:tag" content="workflow engine">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mstn.github.io/images/workflow/workflow-engine.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>A Workflow Engine</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="mstn&#39;s blog" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2025/05/09/category-theory-gpu/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2025/05/28/workflow-engine/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2025/05/28/workflow-engine/&text=A Workflow Engine"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2025/05/28/workflow-engine/&title=A Workflow Engine"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2025/05/28/workflow-engine/&is_video=false&description=A Workflow Engine"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=A Workflow Engine&body=Check out this article: https://mstn.github.io/2025/05/28/workflow-engine/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2025/05/28/workflow-engine/&title=A Workflow Engine"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2025/05/28/workflow-engine/&title=A Workflow Engine"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2025/05/28/workflow-engine/&title=A Workflow Engine"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2025/05/28/workflow-engine/&title=A Workflow Engine"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2025/05/28/workflow-engine/&name=A Workflow Engine&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2025/05/28/workflow-engine/&t=A Workflow Engine"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#The-Abstract-Machine"><span class="toc-number">1.</span> <span class="toc-text">The Abstract Machine</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#More-notes"><span class="toc-number">1.0.1.</span> <span class="toc-text">More notes</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#On-transactions-retries-and-errors"><span class="toc-number">2.</span> <span class="toc-text">On transactions, retries, and errors</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Transactions"><span class="toc-number">2.0.1.</span> <span class="toc-text">Transactions</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Retries"><span class="toc-number">2.0.2.</span> <span class="toc-text">Retries</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Determinism"><span class="toc-number">2.0.3.</span> <span class="toc-text">Determinism</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#On-scalabilty-and-concurrency"><span class="toc-number">3.</span> <span class="toc-text">On scalabilty and concurrency</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Acknowledgments"><span class="toc-number">4.</span> <span class="toc-text">Acknowledgments</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">5.</span> <span class="toc-text">References</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        A Workflow Engine
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">mstn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-05-28T07:00:00.000Z" class="dt-published" itemprop="datePublished">2025-05-28</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/applied-category-theory/" rel="tag">applied category theory</a>, <a class="p-category" href="/tags/azure-durable-functions/" rel="tag">azure durable functions</a>, <a class="p-category" href="/tags/temporal/" rel="tag">temporal</a>, <a class="p-category" href="/tags/workflow-engine/" rel="tag">workflow engine</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>Workflow engines like Temporal and Azure Durable Functions have emerged in recent years to simplify the complexity of building robust, long-running, and stateful applications in distributed environments. I love these technologies because workflow engines offer an effective and relatively simple solution to scalability, reliability, and maintainability, qualities traditionally difficult to achieve in distributed systems, as highlighted in the literature [5].</p>
+<p>Developing workflow engines can sometimes feel like figuring things out as you go. You end up building based on what seems to work, addressing issues as they pop up. This can make the codebase more complicated and make it harder to build a truly robust and scalable system. Unfortunately, industrial engines rarely document their internal design and there are very few formal attempts to understand the semantics of workflow engines (notable exceptions are [6] and [7]).</p>
+<p>In the rest of this post, we assume that a workflow is a network whose nodes are computations that we call activities. The high level architecture of a workflow engine is described in the following picture and consists of an orchestrator, a scheduler, a planner and one or more workers.</p>
+<p><img src="/images/workflow/workflow-engine.png"></p>
+<p>The orchestrator is the brain that coordinates several components. The planner is the component that decides which activities should be executed next, the scheduler assigns tasks (e.g. “execute activity <code>send-email</code>“) to workers and workers carry out the actual computation. The orchestrator updates its internal state accordingly.</p>
+<p>A crucial component is the planner. Given a workflow and its current state, we want to know which activities should be scheduled and in which order. In addition, when an activity is completed, we want to update the state of the workflow in a proper way. In other words, the planner acts as a sort of machine that executes workflows. You may think of it also as an interpreter that processes code written in a fancy workflow-like language instead of Javascript or Python. How can we define the semantics of this machine? This is the question we are planning to answer in this blog post.</p>
+<p>Here is how we intend to proceed. First, we briefly remind that workflows can be represented as string diagrams [2] [8]. Then, in order to build a workflow engine, the question we want to investigate is how we can “execute” a string diagram that represents a workflow. In theory, we could think of building some sort of functor to map a string diagram to something executable like a function. However, we want to run the string diagram in a distributed manner like outlined in the abstract architecture above. In order to do this, we define an <em>abstract</em> machine <em>à la Krivine</em> following the Relational Machine from [1]. The fundamental idea is that the abstract machine “outputs” tasks that will be executed by a pool of workers, concurrently. Here, it is crucial that tasks for the same workflow are independent in such a way that they can be executed in parallel.</p>
+<h1 id="The-Abstract-Machine"><a href="#The-Abstract-Machine" class="headerlink" title="The Abstract Machine"></a>The Abstract Machine</h1><p>Let’s consider the following workflow on the top. It can be represented as the tape diagram [2] on the bottom. From now on we will consider only tape diagrams instead of workflows. Please read our other blog posts and cited literature for more (<a href="/2025/04/26/surfacing-parallelism/">here</a>, <a href="/2025/05/09/category-theory-gpu/">here</a>, and <a href="/2025/05/05/hypergraphs-as-ir/">here</a>). Note that, since a tape diagram can be a representation also for an imperative programs, the machine can run both workflows and programs. Workflow and programs act as ‘user interfaces’; some users might prefer workflows due to the reduced amount of code, while more experienced users might opt for writing code directly. However, this choice does not alter the underlying execution semantics.</p>
+<p><img src="/images/workflow/workflow-vs-tape.png"></p>
+<p>Following [1], a state is a triple of string diagrams $(E, S, C)$ that we call the event log, the current step, and the continuation, respectively.</p>
+<p><img src="/images/workflow/example-triple.png"></p>
+<p>The event log represents the past history of the execution. The idea to represent runs of a process using morphisms in a symmetric monoidal category dates back to [4] where the author used them for describing executions of Petri Nets. We represent the event log as a string diagram, but, in a more familiar setting, we could think about it as a sequence of events corresponding to the syntactic elements that compose the string diagram. This correspondence is shown in the diagram below. A string diagram extends in time from left to right. The position along the time line tells which events happen before the others. Hence, from the diagram, we can recover a list of events (e.g. <code>ActivitySchedule</code>, <code>ActivityStarted</code>, and <code>ActivityCompleted</code>) with their data.</p>
+<p><img src="/images/workflow/trace.png"></p>
+<p>For the same workflow we can have multiple triples at a given time. The reason is that parts of a workflow can be executed in parallel and each triple is processed by a different worker. In the following picture, we show the ideal architecture where triples are stacked to a queue that is consumed by multiple workers. The dark shades indicates the current steps of workflows that are being processed in parallel. Here, two workers are processing two distinct steps of the blue workflow, while only one worker is processing a step of the red workflow. Once a triple is processed, a new one is enqueued. Please note that the queue is an implementation detail; in some situations we prefer other data structures in particular when a FIFO policy is not desirable.</p>
+<p><img src="/images/workflow/queue.png"></p>
+<p>The initial state for a workflow $w$ is a triple $(s, \epsilon, w)$ where $w$ is the string diagram representing the workflow, $\epsilon$ is the empty diagram and $s$ is the input. We represent the input $s$ as a diagram with no input as seen in [3]. In the following picture, we illustrate an example of initial state. This configuration corresponds to the event <code>WorkflowStarted</code> in Azure, in the sense that the workflow has started and the initial triple is ready to be processed by a worker.</p>
+<p><img src="/images/workflow/initial-state.png"></p>
+<p>As we have an initial state, we might have a final state if the workflow terminates. We denote a final step with the following triple. Intuitively, a state is final if the current step and the continuation are the empty diagram, i.e. nothing else is left to be processed. The event log is a linear diagram representing the steps that led us to the final one. We will come back to it later to explain the graphical notation. In Azure, the final state corresponds to the event <code>WorkflowCompleted</code>.</p>
+<p><img src="/images/workflow/final-state.png"></p>
+<p>A workflow run is a sequence of steps from the initial step to maybe the final step. The semantics can be defined formally. Here, we provide an example of a run, but we follow the operational semantics defined in [1]. Note that, in the original paper, continuations are Kleene algebra terms, which are basically string diagrams [2].</p>
+<p>From the initial state, we can move to a state where we schedule one or more activities, i.e. <code>ActivityScheduled</code> event in Azure. The current step is the next activity that is popped out from the workflow.</p>
+<p><img src="/images/workflow/activity-scheduled.png"></p>
+<p>If the state has an activity scheduled, it waits for a worker to become available. When a worker is ready, the state is changed to <code>ActivityStarted</code> and, graphically, it is represented as follows. Intuitively, we “run” the step with the latest known state of the workflow. In practice, some information about the assigned worker is attached to the current step, but it is not shown here because it is an implementation detail.</p>
+<p><img src="/images/workflow/activity-started.png"></p>
+<p>Once the worker terminates, the activity is marked as completed. We denote an activity as completed composing the step with a diagram with no output, [3] call these diagrams events or co-states because they are the mirrored version of a state. Here, to avoid confusion with events of the event log, we will stick to the term co-state; an event log event is more a pair step and co-state. Finally, we push back the step and co-state to the event log.</p>
+<p><img src="/images/workflow/activity-completed.png"></p>
+<p>Here, we pause a second to discuss again the event log. In general, a string diagram does not represent a function. For example, [2] and [8] use relations to define the semantics of flowcharts and programs. However, the event log must be functional. The reason is that every time we replay the event log we want to get the same result. For this reason, we cannot push to the event log a copy of the continuation diagram, but we have to add co-states like a sort of checkpoints that witness the data actually observed on the wires after an activity is completed. If you are familiar with Event Sourcing, co-states stand to snapshots of the event log.</p>
+<p>From one state, more states can be generated. State triples are processed independently by multiple workers without the risk of race conditions. This is the case of tape diagrams (red boxes) that represent alternative flows. For example, after a few steps, we end up in a situation where on the queue we have two triples for the same workflow corresponding to alternative choices (the semantics is the same as the semantics for choice in [1]). The workflow engine can work non-deterministically! This is an interesting feature when we want to explore all the possible alternatives. In the current example, however, only one of the two triples will lead to the final state because only one of the two steps can be reduced to a non empty diagram.</p>
+<p><img src="/images/workflow/tape-queue.png"></p>
+<p>Even if we don’t want non-determinism, there is another more useful scenario when more triples for the same workflow are in the queue. Think about parallel processing: a workflow implements a fan-out pattern: some data are copied over multiple steps that run in parallel. For example, when you bake some cookies, you can mix wet and dry ingredients separately and at the same time (if you are an octopus).</p>
+<p><img src="/images/workflow/parallel-workflow.png"></p>
+<p>It is similar to the case for non-determinism, but a bit more convuluted. We need special continuations for the parallel branches to report their results and a join mechanism to collect the results. Here, I don’t expect to give a complete and correct solution, but just a blueprint of how it is supposed to work.</p>
+<p>The queue for a parallel activity looks like the diagram below.</p>
+<p><img src="/images/workflow/parallel-activity-scheduled.png"></p>
+<p>When the orchestrator processes the triple, it creates two new triples corresponding to the two branches. The initial triple current step has two states attached on the left, but it is open on the right, meaning that the execution for this step is not completed yet. Note that we can split the event log state because of our assumption that event logs are functional. The new triples have a new kind of continuation that references the parent triple and describes how the partial results should be merged back to the parent triple (more later).</p>
+<p><img src="/images/workflow/fork.png"></p>
+<p>Once one of the two sub workflows is completed, the continuation is executed. The continuation contains the instructions that tell the orchestrator how to compose the event with the parent workflow.</p>
+<p><img src="/images/workflow/join.png"></p>
+<p>The parent workflow’s step is updated with the information provided by the sub workflow.</p>
+<p><img src="/images/workflow/merge.png"></p>
+<p>We perform similar steps for the second sub-workflow and the final result is depicted below. Now the current step is marked as completed and can be pushed back to the event log. Note that the event log contains the information about the order of execution of the two sub-workflows (e.g. “green” happened before “yellow” in this particular run).</p>
+<p><img src="/images/workflow/final-merge.png"></p>
+<h3 id="More-notes"><a href="#More-notes" class="headerlink" title="More notes"></a>More notes</h3><p>I omitted several details above to keep it simple and help sharp our intuition. However, there is more to say.</p>
+<p>For example, what are states and co-states in tape diagrams? They are equality predicates and their transposes.</p>
+<p>In addition, we should be more precise and define how to “apply” an event log to a step. For example, consider the following triple. The event log does not have any output, so how can we compose it with the step?</p>
+<p><img src="/images/workflow/simple-step.png"></p>
+<p>A possibility is illustrated below (it is conditioning in [2]). The event logs above could be interpreted as syntactic sugar for this more complex diagram.</p>
+<p><img src="/images/workflow/compose-schedule.png"></p>
+<p>However, there might be better alternatives.</p>
+<h1 id="On-transactions-retries-and-errors"><a href="#On-transactions-retries-and-errors" class="headerlink" title="On transactions, retries, and errors"></a>On transactions, retries, and errors</h1><p>Some random notes and thoughts.</p>
+<h3 id="Transactions"><a href="#Transactions" class="headerlink" title="Transactions"></a>Transactions</h3><p>A key point in the implementation is that state transitions must be transactional in order to avoid race conditions.</p>
+<h3 id="Retries"><a href="#Retries" class="headerlink" title="Retries"></a>Retries</h3><p>The checkpointing ensures that if the process is interrupted, the workflow can resume from the last consistent state recorded in the event log.</p>
+<h3 id="Determinism"><a href="#Determinism" class="headerlink" title="Determinism"></a>Determinism</h3><p>The event log is deterministic by construction: if we rerun it we obtain the same result. However, the execution of the same workflow can produce different results in each workflow instance. More specifically,</p>
+<ul>
+<li>Execution of the same step on different instances gives different results. For example, let’s suppose that a step performs some API calls. API calls with the same endpoint and input may produce different output, for example, it might fail.</li>
+<li>Execution of parallel steps on different instances can produce different results depending on the order of execution of the steps.</li>
+</ul>
+<p>Also within the same instance we have non-determinism due to the choice operator. In practice, we use choice to model conditional behavior, so only one alternative will be chased in a deterministic way. However, there are scenarios where we would like to evolve our execution over all the possible alternatives. Suppose, for example, that we want to do some Reinforcement Learning for an agent; in this case we want to explore alternatives in order to pick the configuration that yields better results for our agent.</p>
+<h1 id="On-scalabilty-and-concurrency"><a href="#On-scalabilty-and-concurrency" class="headerlink" title="On scalabilty and concurrency"></a>On scalabilty and concurrency</h1><p>I think the approach sketched here is different from that of other workflow engines such as Azure Durable Functions and it might overcome the scaling limitations of those technologies.</p>
+<p>In Azure Durable Functions (and likely Temporal), workflow instances are processed by only one worker at a time to maintain state consistency. Since the workflow steps happen sequentially, one after the other, two parts of a workflow cannot change the same in-memory state at the same time. In other words, we can say that state changes are serialized within a single instance <em>at run time</em>, that is, when the instance is executed.</p>
+<p>In our architecture, we also need to serialize state changes in order to avoid race conditions, but this happens at <em>compile time</em> when a workflow is encoded into a tape diagram. Indeed, a tape diagram makes <em>explicit</em> the data dependencies between parts of a workflow. Then, during the execution of the abstract machine, its semantics <em>ensures</em> that only independent triples are put on the queue. In other words, if two parts of the same workflow are on the triple stack at the same time, it means that they can run in parallel without side effects for the other.</p>
+<p>In Azure, scalability is limited by the number of workers because, as we have discussed, an instance is processed by a single worker. A higher count can potentially allow for more concurrent workflow instances, but it consumes more compute resources. Unfortunately, the number of workers cannot be changed dynamically making it hard to calculate the right trade off between parallelism and resource consumption. Activities, on the other hand, can scale more elastically as they are processed from a single queue by any available worker.</p>
+<p>In our architecture, the machine triples are processed in parallel by a pool of workers and parts of the same workflow instance can be processed by multiple workers without race conditions. So it is a model closer to how activities (and not workflows) are processed in Azure. Hence, we can scale out based on demand in theory. In practice, we may need to consider that factors of a parallel term should reasonably run in the same region because some communication is involved for parallel computations.</p>
+<p>What do you think? Does it make sense?</p>
+<h1 id="Acknowledgments"><a href="#Acknowledgments" class="headerlink" title="Acknowledgments"></a>Acknowledgments</h1><p>I gratefully acknowledge Gemini’s helpful input. All inaccuracies, however, are the sole responsibility of… Gemini. I used AI for researching, drafting the boring parts, and spell-checking. I edited and elaborated the generated text trying not to change my “natural” style.</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p>[1] Barrett, Chris, Daniel Castle, and Willem Heijltjes. “The Relational Machine Calculus.” Proceedings of the 39th Annual ACM/IEEE Symposium on Logic in Computer Science. 2024. <a target="_blank" rel="noopener" href="https://dl.acm.org/doi/pdf/10.1145/3661814.3662091">pdf</a></p>
+<p>[2] Bonchi, Filippo, Alessandro Di Giorgio, and Elena Di Lavore. “A Diagrammatic Algebra for Program Logics.” arXiv preprint arXiv:2410.03561 (2024). <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2410.03561">pdf</a></p>
+<p>[3] Kissinger, Aleks, and Bob Coecke. “Picturing Quantum Processes.” (2015).</p>
+<p>[4] Sassone, Vladimiro. “The algebraic structure of Petri nets.” Current Trends in Theoretical Computer Science: The Challenge of the New Century Vol 1: Algorithms and Complexity Vol 2: Formal Models and Semantics. 2004. 385-410. <a target="_blank" rel="noopener" href="https://eprints.soton.ac.uk/261876/1/siSurvey.pdf">pdf</a></p>
+<p>[5] Kleppmann, Martin. “Designing data-intensive applications.” O’Reilly (2019).</p>
+<p>[6] Burckhardt, Sebastian, et al. “Durable functions: Semantics for stateful serverless.” Proceedings of the ACM on Programming Languages 5.OOPSLA (2021): 1-27. <a target="_blank" rel="noopener" href="https://dl.acm.org/doi/pdf/10.1145/3485510">pdf</a></p>
+<p>[7] Burckhardt, Sebastian, et al. “Netherite: Efficient execution of serverless workflows.” Proceedings of the VLDB Endowment 15.8 (2022): 1591-1604. <a target="_blank" rel="noopener" href="https://www.microsoft.com/en-us/research/wp-content/uploads/2022/07/p1591-burckhardt.pdf">pdf</a></p>
+<p>[8] Stefanescu, Gheorghe. Network algebra. Springer Science &amp; Business Media, 2000.</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#The-Abstract-Machine"><span class="toc-number">1.</span> <span class="toc-text">The Abstract Machine</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#More-notes"><span class="toc-number">1.0.1.</span> <span class="toc-text">More notes</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#On-transactions-retries-and-errors"><span class="toc-number">2.</span> <span class="toc-text">On transactions, retries, and errors</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Transactions"><span class="toc-number">2.0.1.</span> <span class="toc-text">Transactions</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Retries"><span class="toc-number">2.0.2.</span> <span class="toc-text">Retries</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Determinism"><span class="toc-number">2.0.3.</span> <span class="toc-text">Determinism</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#On-scalabilty-and-concurrency"><span class="toc-number">3.</span> <span class="toc-text">On scalabilty and concurrency</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Acknowledgments"><span class="toc-number">4.</span> <span class="toc-text">Acknowledgments</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">5.</span> <span class="toc-text">References</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://mstn.github.io/2025/05/28/workflow-engine/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://mstn.github.io/2025/05/28/workflow-engine/&text=A Workflow Engine"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://mstn.github.io/2025/05/28/workflow-engine/&title=A Workflow Engine"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://mstn.github.io/2025/05/28/workflow-engine/&is_video=false&description=A Workflow Engine"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=A Workflow Engine&body=Check out this article: https://mstn.github.io/2025/05/28/workflow-engine/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://mstn.github.io/2025/05/28/workflow-engine/&title=A Workflow Engine"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://mstn.github.io/2025/05/28/workflow-engine/&title=A Workflow Engine"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://mstn.github.io/2025/05/28/workflow-engine/&title=A Workflow Engine"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://mstn.github.io/2025/05/28/workflow-engine/&title=A Workflow Engine"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://mstn.github.io/2025/05/28/workflow-engine/&name=A Workflow Engine&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://mstn.github.io/2025/05/28/workflow-engine/&t=A Workflow Engine"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    mstn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+ 
+  <link
+    rel="preload"
+    href="/lib/font-awesome/css/all.min.css"
+    as="style"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript
+    ><link
+      rel="stylesheet"
+      href="/lib/font-awesome/css/all.min.css"
+  /></noscript>
+
+
+    <!-- jquery -->
+
+  
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+
+
+
+<!-- clipboard -->
+
+  
+    
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
